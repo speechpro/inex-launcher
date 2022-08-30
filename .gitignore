@@ -1,0 +1,16 @@
+/.idea/
+/.pytest_cache/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+/temp/
+/.eggs/
+/mkernel.egg-info/
+/venv/
+/build/
+/dist/
+/*.so
+/.tox/
+/path.sh
+/exp/
+/mkernel/version.py
