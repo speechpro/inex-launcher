@@ -10,4 +10,4 @@ source venv/bin/activate || exit 1
 
 pip install -e . || exit 1
 
-#pytest || exit 1
+pytest || exit 1
