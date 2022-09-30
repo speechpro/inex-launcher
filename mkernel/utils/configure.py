@@ -48,9 +48,9 @@ def load_config(conf_path):
 
 
 def create_plugin(name, config, state):
-    assert name in config, f'Failed find module "{name}" in config\n{config.yaml()}'
+    assert name in config, f'Failed find module "{name}" in config\n{config}'
     params = config[name]
-    assert 'module' in params, f'Failed find module for plugin {name} in config \n{config.yaml()}'
+    assert 'module' in params, f'Failed find module for plugin {name} in config \n{config}'
     modname = params['module']
     options = params['options'] if 'options' in params else dict()
     if 'imports' in params:
@@ -72,7 +72,7 @@ def get_as_is(config, key, default=None, required=False):
     if key in config:
         return config[key]
     else:
-        assert not required, f'Failed to find "{key}" in config\n{yaml.dump(config)}'
+        assert not required, f'Failed to find "{key}" in config\n{config}'
         return default
 
 

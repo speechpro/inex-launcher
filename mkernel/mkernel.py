@@ -16,7 +16,7 @@ def main():
     parser.add_argument('--log-level', '-l', type=str, default='WARNING', help='Set the root logger level.')
     parser.add_argument('--log-path', '-g', type=str, help='Path to the log-file.')
     parser.add_argument('--sys-paths', '-s', type=str, help='Paths to add to the list of system paths (sys.path).')
-    parser.add_argument('--override', '-o', type=str, nargs='*', help='Options to be overridden (in "dot" notation: "key1.key2=value").')
+    parser.add_argument('--override', '-o', type=str, action='append', help='Options to be overridden (in "dot" notation: "key1.key2=value").')
     parser.add_argument('config_path', type=str, help='Path to the configuration file (in YAML or JSON) or string with configuration in YAML.')
     args = parser.parse_args()
 
@@ -37,7 +37,7 @@ def main():
             assert len(parts) == 2, f'Wrong value of the command line "--override" option "{option}" (must be in form "key1=value")'
             key, value = parts
             logging.info(f'Updating config: {key}: {config[key]} ==> {value}')
-            config[key] = eval(value)
+            config[key] = value
     config.resolve()
     logging.info(f'Config:\n{config.yaml()}')
 
