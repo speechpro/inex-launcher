@@ -1,5 +1,5 @@
-import yaml
 import unittest
+from mkernel.utils.configure import load_config
 from mkernel.utils.options import Options
 
 
@@ -49,7 +49,7 @@ class UtilsOptions(unittest.TestCase):
         self.assertEqual(None, options['a'])
 
     def test_data(self):
-        options = Options(yaml.safe_load(self.options))
+        options = Options(load_config(self.options))
         self.assertTrue('features' in options)
         self.assertTrue('chunker' in options)
         self.assertTrue('blabla' not in options)
@@ -64,14 +64,14 @@ class UtilsOptions(unittest.TestCase):
         self.assertEqual(5, options['chunker.options.right_context'])
 
     def test_reference(self):
-        options = Options(yaml.safe_load(self.options))
+        options = Options(load_config(self.options))
         self.assertTrue('num_iters' in options)
         self.assertEqual(100, options['num_iters'])
         self.assertEqual(100, options['trainer.options.num_iters'])
         self.assertEqual(100, options['scheduler.options.total_steps'])
 
     def test_resolve(self):
-        options = Options(yaml.safe_load(self.options))
+        options = Options(load_config(self.options))
         options.resolve()
         options = options.data
         self.assertEqual(100, options['scheduler']['options']['total_steps'])

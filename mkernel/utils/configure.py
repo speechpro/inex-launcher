@@ -1,9 +1,7 @@
 import os
 import sys
-import copy
-import json
-import yaml
 import logging
+from omegaconf import OmegaConf
 from logging import StreamHandler, FileHandler
 from mkernel.utils.convert import str_to_bool
 
@@ -30,21 +28,16 @@ def configure_logging(log_level, log_path=None):
 def load_config(conf_path):
     assert conf_path is not None, 'Failed to load config: config path is None'
     if isinstance(conf_path, dict):
-        config = copy.copy(conf_path)
+        config = OmegaConf.create(conf_path)
     elif conf_path == '-':
-        config = yaml.safe_load(sys.stdin.read())
+        config = OmegaConf.create(sys.stdin.read())
     else:
         assert len(conf_path) > 0, 'Failed to load config: config path is empty string'
         if os.path.isfile(conf_path):
-            with open(conf_path, encoding='utf-8') as stream:
-                ext = os.path.splitext(conf_path)[1]
-                if ext == '.json':
-                    config = json.load(stream)
-                else:
-                    config = yaml.safe_load(stream)
+            config = OmegaConf.load(conf_path)
         else:
-            config = yaml.safe_load(conf_path)
-    return config
+            config = OmegaConf.create(conf_path)
+    return OmegaConf.to_container(config)
 
 
 def create_plugin(name, config, state):

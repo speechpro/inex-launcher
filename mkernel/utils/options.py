@@ -1,4 +1,3 @@
-import yaml
 from copy import deepcopy
 from mkernel.utils.convert import str_to_bool
 
@@ -24,7 +23,7 @@ class Options:
         if self.__contains__(path):
             return self.__getitem__(path)
         else:
-            assert not required, f'Failed to find "{path}" in config\n{self.yaml()}'
+            assert not required, f'Failed to find "{path}" in config\n{self.data}'
             return default
 
     def as_bool(self, path, default=False, required=False):
@@ -76,10 +75,9 @@ class Options:
                 value = value[key]
         if isinstance(value, str) and value.startswith('<<'):
             path = value[2:].strip()
-            assert self.__contains__(path), f'The key "{path}" does not exist in config:\n{self.yaml()}'
+            assert self.__contains__(path), f'The key "{path}" does not exist in config:\n{self.data}'
             value = self.__getitem__(path)
         return value
-        # return Options(value) if isinstance(value, dict) else value
 
     def __contains__(self, path):
         assert path is not None, 'Path is None in Options.__getitem__()'
@@ -113,9 +111,6 @@ class Options:
             key = keys[-1]
             if key in data:
                 del data[key]
-
-    def yaml(self):
-        return yaml.dump(self.data)
 
     def __repr__(self):
         return self.data.__repr__()

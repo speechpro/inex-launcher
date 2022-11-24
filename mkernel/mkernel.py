@@ -4,8 +4,9 @@ import time
 import datetime
 import logging
 import argparse
-from mkernel.utils.options import Options
+from omegaconf import OmegaConf
 from mkernel.utils.configure import configure_logging, load_config
+from mkernel.utils.options import Options
 from mkernel.engine import Engine
 
 
@@ -39,7 +40,7 @@ def main():
             logging.info(f'Updating config: {key}: {config[key]} ==> {value}')
             config[key] = value
     config.resolve()
-    logging.info(f'Config:\n{config.yaml()}')
+    logging.info(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config.data))}')
 
     state = Options()
     state['command_line'] = ' '.join(sys.argv)
