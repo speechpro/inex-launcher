@@ -37,7 +37,7 @@ def load_config(conf_path):
             config = OmegaConf.load(conf_path)
         else:
             config = OmegaConf.create(conf_path)
-    return OmegaConf.to_container(config)
+    return OmegaConf.to_container(config, resolve=True)
 
 
 def create_plugin(name, config, state):
