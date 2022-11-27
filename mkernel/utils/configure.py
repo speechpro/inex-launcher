@@ -45,6 +45,13 @@ def create_plugin(name, config, state):
     params = config[name]
     assert 'module' in params, f'Failed find module for plugin {name} in config \n{config}'
     modname = params['module']
+    parts = modname.split('/')
+    if len(parts) > 1:
+        assert len(parts) == 2, f'Wrong module name format ({modname}) for plugin {name} in config \n{config}'
+        modname = parts[0]
+        classname = parts[1]
+    else:
+        classname = None
     options = params['options'] if 'options' in params else dict()
     if 'imports' in params:
         imports = params['imports']
@@ -53,8 +60,13 @@ def create_plugin(name, config, state):
     logging.debug(f'Creating plugin {name} from config "{options}"')
     logging.info(f'Loading module "{modname}"')
     module = __import__(modname, fromlist=[''])
-    logging.info(f'Creating plugin {name} from module "{modname}"')
-    plugin = module.create(options)
+    if classname is None:
+        logging.info(f'Creating plugin {name} using class factory create() from module "{modname}"')
+        plugin = module.create(options)
+    else:
+        logging.info(f'Creating plugin {name} with class name {classname} from module "{modname}"')
+        classtype = getattr(module, classname)
+        plugin = classtype(**options)
     if 'exports' in params:
         for key in params['exports']:
             state[f'{name}.{key}'] = plugin.get(key)

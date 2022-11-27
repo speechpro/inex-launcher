@@ -23,7 +23,7 @@ class MkernelEngine(unittest.TestCase):
             }
         },
         'chunker': {
-            'module': 'tests.plugins.chunker',
+            'module': 'tests.plugins.chunker/Chunker',
             'imports': {},
             'exports': ['left_context', 'window_length', 'right_context'],
             'options': {

@@ -5,7 +5,6 @@ from mkernel.utils.configure import get_as_is, get_as_int
 
 class Dataset:
     def __init__(self, config):
-        super().__init__()
         logging.info(f'Creating dataset from config\n{config}')
         self.frame_length = get_as_int(config, 'frame_length', required=True)
         self.frame_shift = get_as_int(config, 'frame_shift', required=True)

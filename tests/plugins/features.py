@@ -5,7 +5,6 @@ from mkernel.utils.configure import get_as_int
 
 class Extractor:
     def __init__(self, config):
-        super().__init__()
         logging.info(f'Creating features extractor from config\n{config}')
         self.frequency = get_as_int(config, 'frequency', required=True)
         self.frame_length = get_as_int(config, 'frame_length', required=True)

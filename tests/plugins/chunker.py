@@ -1,15 +1,11 @@
-import logging
 from random import randint
-from mkernel.utils.configure import get_as_int
 
 
 class Chunker:
-    def __init__(self, config):
-        super().__init__()
-        logging.info(f'Creating chunker from config\n{config}')
-        self.left_context = get_as_int(config, 'left_context', required=True)
-        self.window_length = get_as_int(config, 'window_length', required=True)
-        self.right_context = get_as_int(config, 'right_context', required=True)
+    def __init__(self, left_context, window_length, right_context):
+        self.left_context = int(left_context)
+        self.window_length = int(window_length)
+        self.right_context = int(right_context)
 
     def get(self, key):
         if key == 'left_context':
@@ -27,7 +23,3 @@ class Chunker:
         shift = randint(0, length - width)
         feats_chunk = features[shift: shift + width]
         return feats_chunk
-
-
-def create(config):
-    return Chunker(config)
