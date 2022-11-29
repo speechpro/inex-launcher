@@ -1,0 +1,5 @@
+plugins:
+  - generator1
+  - generator2
+  - calculator
+start: plugins.calculator

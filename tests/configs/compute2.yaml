@@ -1,0 +1,20 @@
+plugins:
+  - generator
+  - calculator
+start: plugins.calculator
+
+generator:
+  module: tests.plugins.generator/Generator
+  imports: {}
+  exports: []
+  options:
+    a: 0
+    b: 9
+
+calculator:
+  module: tests.plugins.calculator2/Calculator
+  imports:
+    generator: plugins.generator
+  exports: []
+  options:
+    num_iters: 5

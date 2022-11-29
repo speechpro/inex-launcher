@@ -1,0 +1,7 @@
+calculator:
+  module: tests.plugins.calculator1/Calculator
+  imports:
+    value1: generator1.value
+    value2: generator2.value
+  exports: []
+  options: {}

@@ -1,0 +1,10 @@
+plugins:
+  - message
+start: plugins.message
+
+message:
+  module: tests.plugins.message/Message
+  imports: {}
+  exports: []
+  options:
+    text: Hello!
