@@ -4,7 +4,7 @@ from mkernel.engine import Engine
 
 
 class MkernelEngine(unittest.TestCase):
-    config = {
+    config1 = {
         'plugins': [
           'features',
           'chunker',
@@ -51,14 +51,55 @@ class MkernelEngine(unittest.TestCase):
         },
     }
 
-    def test_engine(self):
+    config2 = {
+        'plugins': [
+          'plugin',
+          'runner',
+        ],
+        'plugin': {
+            'module': 'tests.plugins.collection/Plugin',
+            'imports': {},
+            'exports': ['value'],
+            'options': {
+                'value': 17,
+            }
+        },
+        'runner': {
+            'module': 'tests.plugins.collection/Runner',
+            'imports': {
+                'value1': 'plugin.value',
+                'plugin': 'plugins.plugin',
+            },
+            'exports': [],
+            'options': {
+                'value2': 23,
+            }
+        },
+        'execute': {
+            'method': 'plugins.runner/check',
+            'imports': {
+                'value1': 'plugin.value',
+                'plugin': 'plugins.plugin',
+            },
+            'options': {
+                'value2': 23
+            }
+        },
+    }
+
+    def test_base(self):
         state = dict()
-        engine = Engine(Options(self.config), state)
+        engine = Engine(Options(self.config1), state)
         dataset = engine.run()
         self.assertEqual(100, len(dataset))
         for chunk in dataset:
             self.assertEqual(20, chunk.shape[0])
             self.assertEqual(40, chunk.shape[1])
+
+    def test_advanced(self):
+        state = dict()
+        engine = Engine(Options(self.config2), state)
+        engine.run()
 
 
 if __name__ == '__main__':

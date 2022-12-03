@@ -68,8 +68,15 @@ def create_plugin(name, config, state):
         classtype = getattr(module, classname)
         plugin = classtype(**options)
     if 'exports' in params:
-        for key in params['exports']:
-            state[f'{name}.{key}'] = plugin.get(key)
+        for attr in params['exports']:
+            if hasattr(plugin, attr):
+                state[f'{name}.{attr}'] = getattr(plugin, attr)
+            elif hasattr(plugin, 'export'):
+                state[f'{name}.{attr}'] = plugin.export(attr)
+            elif hasattr(plugin, 'get'):
+                state[f'{name}.{attr}'] = plugin.get(attr)
+            else:
+                assert False, f'Plugin {type(plugin)} does not have attribute {attr}'
     state[f'plugins.{name}'] = plugin
 
 
