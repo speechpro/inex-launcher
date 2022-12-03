@@ -1,14 +1,19 @@
+import logging
 from mkernel.utils.configure import create_plugin, get_as_is
 
 
 class Engine:
     def __init__(self, config, state):
+        logging.debug('Creating plugins')
         plugins = config.as_is('plugins', required=True)
         assert isinstance(plugins, list), f'Wrong type of the "plugins" {type(plugins)} (must be list)'
         for plugin in plugins:
             create_plugin(plugin, config, state)
+        logging.debug('Looking for execution options')
         if 'execute' in config:
+            logging.debug('Loading advanced execution options')
             exopts = config.as_is('execute', required=True)
+            logging.debug(f'Loading execution options from config:\n{exopts}')
             value = get_as_is(exopts, 'method', required=True)
             parts = value.split('/')
             if len(parts) == 1:
@@ -27,6 +32,7 @@ class Engine:
                 for key, value in imports.items():
                     self.params[key] = state[value]
         else:
+            logging.debug('Loading base execution options')
             value = config.as_is('start', required=True)
             parts = value.split('/')
             if len(parts) == 1:

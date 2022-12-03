@@ -81,7 +81,9 @@ def main():
     logging.info(state['command_line'])
     state['config_path'] = args.config_path
 
+    logging.debug('Creating mkernel engine')
     engine = Engine(config=config, state=state)
+    logging.debug('Starting mkernel execution')
     engine.run()
 
     time_total = int(time.time() - time_total)
