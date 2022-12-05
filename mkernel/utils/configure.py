@@ -41,13 +41,13 @@ def load_config(conf_path):
 
 
 def create_plugin(name, config, state):
-    assert name in config, f'Failed find module "{name}" in config\n{config}'
+    assert name in config, f'Failed find module {name} in config\n{config}'
     params = config[name]
-    assert 'module' in params, f'Failed find module for plugin {name} in config \n{config}'
+    assert 'module' in params, f'Failed find module for plugin {name} in config\n{config}'
     modname = params['module']
     parts = modname.split('/')
     if len(parts) > 1:
-        assert len(parts) == 2, f'Wrong module name format ({modname}) for plugin {name} in config \n{config}'
+        assert len(parts) == 2, f'Wrong module name format ({modname}) for plugin {name} in config\n{config}'
         modname = parts[0]
         classname = parts[1]
     else:
@@ -56,23 +56,34 @@ def create_plugin(name, config, state):
     if 'imports' in params:
         imports = params['imports']
         for key, value in imports.items():
-            options[key] = state[value]
-    logging.debug(f'Creating plugin {name} from config "{options}"')
-    logging.info(f'Loading module "{modname}"')
+            if isinstance(value, list):
+                values = list()
+                for value1 in value:
+                    values.append(state[value1])
+                options[key] = values
+            elif isinstance(value, dict):
+                values = dict()
+                for key1, value1 in value.items():
+                    values[key1] = state[value1]
+                options[key] = values
+            else:
+                options[key] = state[value]
+    logging.debug(f'Creating plugin {name} from config\n{options}')
+    logging.info(f'Loading module {modname}')
     module = __import__(modname, fromlist=[''])
     if classname is None:
-        logging.info(f'Creating plugin {name} using class factory create() from module "{modname}"')
+        logging.info(f'Creating plugin {name} using class factory create() from module {modname}')
         plugin = module.create(options)
     else:
-        logging.info(f'Creating plugin {name} with class name {classname} from module "{modname}"')
+        logging.info(f'Creating plugin {name} with class name {classname} from module {modname}')
         classtype = getattr(module, classname)
         plugin = classtype(**options)
     if 'exports' in params:
         for attr in params['exports']:
-            if hasattr(plugin, attr):
-                state[f'{name}.{attr}'] = getattr(plugin, attr)
-            elif hasattr(plugin, 'export'):
+            if hasattr(plugin, 'export'):
                 state[f'{name}.{attr}'] = plugin.export(attr)
+            elif hasattr(plugin, attr):
+                state[f'{name}.{attr}'] = getattr(plugin, attr)
             elif hasattr(plugin, 'get'):
                 state[f'{name}.{attr}'] = plugin.get(attr)
             else:
@@ -84,7 +95,7 @@ def get_as_is(config, key, default=None, required=False):
     if key in config:
         return config[key]
     else:
-        assert not required, f'Failed to find "{key}" in config\n{config}'
+        assert not required, f'Failed to find {key} in config\n{config}'
         return default
 
 

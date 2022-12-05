@@ -30,7 +30,18 @@ class Engine:
             if 'imports' in exopts:
                 imports = exopts['imports']
                 for key, value in imports.items():
-                    self.params[key] = state[value]
+                    if isinstance(value, list):
+                        values = list()
+                        for value1 in value:
+                            values.append(state[value1])
+                        self.params[key] = values
+                    elif isinstance(value, dict):
+                        values = dict()
+                        for key1, value1 in value.items():
+                            values[key1] = state[value1]
+                        self.params[key] = values
+                    else:
+                        self.params[key] = state[value]
         else:
             logging.debug('Loading base execution options')
             value = config.as_is('start', required=True)

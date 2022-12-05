@@ -53,36 +53,67 @@ class MkernelEngine(unittest.TestCase):
 
     config2 = {
         'plugins': [
-          'plugin',
+          'number1',
+          'number2',
+          'number3',
           'runner',
         ],
-        'plugin': {
-            'module': 'tests.plugins.collection/Plugin',
+        'number1': {
+            'module': 'tests.plugins.collection/Number',
             'imports': {},
             'exports': ['value'],
             'options': {
-                'value': 17,
+                'value': 1,
+            }
+        },
+        'number2': {
+            'module': 'tests.plugins.collection/Number',
+            'imports': {},
+            'exports': ['value'],
+            'options': {
+                'value': 2,
+            }
+        },
+        'number3': {
+            'module': 'tests.plugins.collection/Number',
+            'imports': {},
+            'exports': ['value'],
+            'options': {
+                'value': 3,
             }
         },
         'runner': {
             'module': 'tests.plugins.collection/Runner',
             'imports': {
-                'value1': 'plugin.value',
-                'plugin': 'plugins.plugin',
+                'number3': 'number3.value',
+                'arr_val1': ['number3.value', 'number1.value', 'number2.value'],
+                'dic_val1': {3: 'number3.value', 1: 'number1.value', 2: 'number2.value'},
+                'plugin1': 'plugins.number1',
+                'plugin2': 'plugins.number2',
+                'plugin3': 'plugins.number3',
             },
             'exports': [],
             'options': {
-                'value2': 23,
+                'number1': 1,
+                'number2': 2,
             }
         },
         'execute': {
             'method': 'plugins.runner/check',
             'imports': {
-                'value1': 'plugin.value',
-                'plugin': 'plugins.plugin',
+                'number3': 'number3.value',
+                'arr_val2': ['number3.value', 'number1.value', 'number2.value'],
+                'dic_val2': {3: 'number3.value', 1: 'number1.value', 2: 'number2.value'},
+                'plugin1': 'plugins.number1',
+                'plugin2': 'plugins.number2',
+                'plugin3': 'plugins.number3',
             },
             'options': {
-                'value2': 23
+                'number1': 1,
+                'number2': 2,
+                'number4': 23,
+                'arr_val3': [3, 1, 2],
+                'dic_val3': {1: 1, 2: 2, 3: 3},
             }
         },
     }
