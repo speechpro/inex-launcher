@@ -59,12 +59,12 @@ def create_plugin(name, config, state):
             if isinstance(value, list):
                 values = list()
                 for value1 in value:
-                    values.append(state[value1])
+                    values.append(state[value1] if value1 in state else value1)
                 options[key] = values
             elif isinstance(value, dict):
                 values = dict()
                 for key1, value1 in value.items():
-                    values[key1] = state[value1]
+                    values[key1] = state[value1] if value1 in state else value1
                 options[key] = values
             else:
                 options[key] = state[value]
