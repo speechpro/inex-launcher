@@ -1,62 +1,56 @@
 import logging
-from mkernel.utils.configure import create_plugin, get_as_is
+from mkernel.utils.configure import resolve_option, create_plugin
 
 
 class Engine:
     def __init__(self, config, state):
         logging.debug('Creating plugins')
-        plugins = config.as_is('plugins', required=True)
-        assert isinstance(plugins, list), f'Wrong type of the "plugins" {type(plugins)} (must be list)'
+        assert 'plugins' in config, f'Failed to find "plugins" in config\n{config}'
+        plugins = config['plugins']
+        assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
         for plugin in plugins:
             create_plugin(plugin, config, state)
         logging.debug('Looking for execution options')
         if 'execute' in config:
             logging.debug('Loading advanced execution options')
-            exopts = config.as_is('execute', required=True)
-            logging.debug(f'Loading execution options from config:\n{exopts}')
-            value = get_as_is(exopts, 'method', required=True)
+            exopts = config['execute']
+            logging.debug(f'Loading execution options from options\n{exopts}')
+            assert 'method' in exopts, f'Failed to find "method" in options\n{exopts}'
+            value = exopts['method']
             parts = value.split('/')
             if len(parts) == 1:
                 plugin = value
                 method = 'run'
             else:
-                assert len(parts) == 2, f'Wrong execution option format in line "{value}"'
+                assert len(parts) == 2, f'Wrong execution option format in line\n{value}'
                 plugin = parts[0]
                 method = parts[1]
-            plugin = get_as_is(state, plugin, required=True)
-            assert hasattr(plugin, method), f'Plugin {type(plugins)} does not have attribute {method}'
+            assert plugin in state, f'Failed to find "{plugin}" in options\n{state}'
+            plugin = state[plugin]
+            assert hasattr(plugin, method), f'Plugin {type(plugins)} does not have attribute "{method}"'
             self.method = getattr(plugin, method)
             self.params = exopts['options'] if 'options' in exopts else dict()
             if 'imports' in exopts:
                 imports = exopts['imports']
                 for key, value in imports.items():
-                    if isinstance(value, list):
-                        values = list()
-                        for value1 in value:
-                            values.append(state[value1] if value1 in state else value1)
-                        self.params[key] = values
-                    elif isinstance(value, dict):
-                        values = dict()
-                        for key1, value1 in value.items():
-                            values[key1] = state[value1] if value1 in state else value1
-                        self.params[key] = values
-                    else:
-                        self.params[key] = state[value]
+                    self.params[key] = resolve_option(value, state)
         else:
             logging.debug('Loading base execution options')
-            value = config.as_is('start', required=True)
+            assert 'start' in config, f'Failed to find "start" in config\n{config}'
+            value = config['start']
             parts = value.split('/')
             if len(parts) == 1:
                 plugin = value
                 method = 'run'
             else:
-                assert len(parts) == 2, f'Wrong execution option format in line "{value}"'
+                assert len(parts) == 2, f'Wrong execution option format in line\n{value}'
                 plugin = parts[0]
                 method = parts[1]
-            plugin = get_as_is(state, plugin, required=True)
-            assert hasattr(plugin, method), f'Plugin {type(plugins)} does not have attribute {method}'
+            assert plugin in state, f'Failed to find "{plugin}" in options\n{state}'
+            plugin = state[plugin]
+            assert hasattr(plugin, method), f'Plugin {type(plugins)} does not have attribute "{method}"'
             self.method = getattr(plugin, method)
             self.params = dict()
 
-    def run(self):
+    def __call__(self):
         return self.method(**self.params)

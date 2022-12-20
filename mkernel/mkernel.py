@@ -6,7 +6,6 @@ import logging
 import argparse
 from omegaconf import OmegaConf
 from mkernel.utils.configure import configure_logging, load_config
-from mkernel.utils.options import Options
 from mkernel.engine import Engine
 
 
@@ -72,11 +71,10 @@ def main():
     if len(dot_list) > 0:
         options = OmegaConf.from_dotlist(dot_list)
         config = OmegaConf.merge(config, options)
-    config = Options(OmegaConf.to_container(config, resolve=True))
-    config.resolve()
-    logging.info(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config.data))}')
+    config = OmegaConf.to_container(config, resolve=True)
+    logging.info(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
 
-    state = Options()
+    state = dict()
     state['command_line'] = ' '.join(sys.argv)
     logging.info(state['command_line'])
     state['config_path'] = args.config_path
@@ -84,7 +82,7 @@ def main():
     logging.debug('Creating mkernel engine')
     engine = Engine(config=config, state=state)
     logging.debug('Starting mkernel execution')
-    engine.run()
+    engine()
 
     time_total = int(time.time() - time_total)
     time_total = f'{datetime.timedelta(seconds=time_total)} ({int(time_total)} sec)'

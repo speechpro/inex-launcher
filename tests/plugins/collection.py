@@ -40,3 +40,41 @@ class Runner:
         for key, value in self.dic_val1.items():
             assert dic_val2[key] == value
             assert dic_val3[key] == value
+
+
+class TestResolve:
+    def __init__(self, data1, data2):
+        self.data1 = data1
+        self.data2 = data2
+
+    def test(self, data1, data2):
+        for data in [data1, self.data1]:
+            assert isinstance(data, list)
+            assert len(data) == 3
+            assert isinstance(data[0], int)
+            assert data[0] == 1
+            assert isinstance(data[1], list)
+            assert len(data[1]) == 3
+            assert data[1][0] == 1
+            assert data[1][1] == 2
+            assert data[1][2] == 3
+            assert isinstance(data[2], dict)
+            assert len(data[2]) == 3
+            for i in range(1, 4):
+                assert isinstance(data[2][i], Number)
+                assert data[2][i].value == i
+
+        for data in [data2, self.data2]:
+            assert isinstance(data, dict)
+            assert len(data) == 3
+            assert isinstance(data[1], Number)
+            assert isinstance(data[2], list)
+            assert isinstance(data[3], dict)
+            assert len(data[2]) == 3
+            assert len(data[3]) == 3
+            for i in range(3):
+                assert isinstance(data[2][i], int)
+                assert data[2][i] == i + 1
+            for i in range(1, 4):
+                assert isinstance(data[3][i], Number)
+                assert data[3][i].value == i

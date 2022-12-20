@@ -40,6 +40,24 @@ def load_config(conf_path):
     return config
 
 
+def resolve_option(option, state):
+    if isinstance(option, list):
+        for i, value in enumerate(option):
+            if isinstance(value, list) or isinstance(value, dict):
+                option[i] = resolve_option(value, state)
+            elif isinstance(value, str) and (value in state):
+                option[i] = state[value]
+    elif isinstance(option, dict):
+        for key, value in option.items():
+            if isinstance(value, list) or isinstance(value, dict):
+                option[key] = resolve_option(value, state)
+            elif isinstance(value, str) and (value in state):
+                option[key] = state[value]
+    elif isinstance(option, str) and (option in state):
+        option = state[option]
+    return option
+
+
 def create_plugin(name, config, state):
     assert name in config, f'Failed find module {name} in config\n{config}'
     params = config[name]
@@ -56,18 +74,7 @@ def create_plugin(name, config, state):
     if 'imports' in params:
         imports = params['imports']
         for key, value in imports.items():
-            if isinstance(value, list):
-                values = list()
-                for value1 in value:
-                    values.append(state[value1] if value1 in state else value1)
-                options[key] = values
-            elif isinstance(value, dict):
-                values = dict()
-                for key1, value1 in value.items():
-                    values[key1] = state[value1] if value1 in state else value1
-                options[key] = values
-            else:
-                options[key] = state[value]
+            options[key] = resolve_option(value, state)
     logging.debug(f'Creating plugin {name} from config\n{options}')
     logging.info(f'Loading module {modname}')
     module = __import__(modname, fromlist=[''])
