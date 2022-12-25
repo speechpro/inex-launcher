@@ -71,7 +71,7 @@ def main():
     if len(dot_list) > 0:
         options = OmegaConf.from_dotlist(dot_list)
         config = OmegaConf.merge(config, options)
-    config = OmegaConf.to_container(config, resolve=True)
+    config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
     logging.info(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
 
     state = dict()
