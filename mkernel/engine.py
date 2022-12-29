@@ -25,10 +25,15 @@ class Engine:
                 assert len(parts) == 2, f'Wrong execution option format in line\n{value}'
                 plugin = parts[0]
                 method = parts[1]
-            assert plugin in state, f'Failed to find "{plugin}" in options\n{state}'
-            plugin = state[plugin]
-            assert hasattr(plugin, method), f'Plugin {type(plugins)} does not have attribute "{method}"'
-            self.method = getattr(plugin, method)
+            if plugin in state:
+                plugin = state[plugin]
+                assert hasattr(plugin, method), f'Plugin {type(plugin)} does not have attribute "{method}"'
+                self.method = getattr(plugin, method)
+            else:
+                logging.info(f'Loading module {plugin}')
+                plugin = __import__(plugin, fromlist=[''])
+                assert hasattr(plugin, method), f'Plugin {type(plugin)} does not have attribute "{method}"'
+                self.method = getattr(plugin, method)
             self.params = exopts['options'] if 'options' in exopts else dict()
             if 'imports' in exopts:
                 imports = exopts['imports']
