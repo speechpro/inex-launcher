@@ -5,11 +5,13 @@ from mkernel.utils.configure import resolve_option, create_plugin
 class Engine:
     def __init__(self, config, state):
         logging.debug('Creating plugins')
-        assert 'plugins' in config, f'Failed to find "plugins" in config\n{config}'
-        plugins = config['plugins']
-        assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
-        for plugin in plugins:
-            create_plugin(plugin, config, state)
+        if 'plugins' in config:
+            plugins = config['plugins']
+            assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
+            for plugin in plugins:
+                create_plugin(plugin, config, state)
+        else:
+            plugins = list()
         logging.debug('Looking for execution options')
         if 'execute' in config:
             logging.debug('Loading advanced execution options')
