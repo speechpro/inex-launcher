@@ -35,7 +35,7 @@ setup(
     python_requires='>=3.6',
     author='Yuri Khokhlov',
     author_email='khokhlov@speechpro.com',
-    description='inex: Microkernel',
+    description='inex: Initialize & Execute',
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='Apache Software License',
