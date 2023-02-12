@@ -1,5 +1,5 @@
 import unittest
-from mkernel.engine import Engine
+from inex.engine import Engine
 
 
 class MkernelEngine(unittest.TestCase):

@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 /temp/
 /.eggs/
-/mkernel.egg-info/
+/inex.egg-info/
 /venv/
 /build/
 /dist/
@@ -13,4 +13,4 @@ __pycache__/
 /.tox/
 /path.sh
 /exp/
-/mkernel/version.py
+/inex/version.py

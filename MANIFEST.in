@@ -1,1 +1,1 @@
-include requirements.txt mkernel/version.txt
+include requirements.txt inex/version.txt

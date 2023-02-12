@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tag=v$(cat mkernel/version.txt)
+tag=v$(cat inex/version.txt)
 mark=$(git tag | grep $tag)
 if [ -z "$mark" ]; then
   echo "Creating new tag $tag"

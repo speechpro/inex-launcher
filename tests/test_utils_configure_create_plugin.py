@@ -1,5 +1,5 @@
 import unittest
-from mkernel.utils.configure import create_plugin
+from inex.utils.configure import create_plugin
 
 
 class UtilsConfigureCreatePlugin(unittest.TestCase):

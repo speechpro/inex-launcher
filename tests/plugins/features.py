@@ -1,6 +1,6 @@
 import logging
 import numpy as np
-from mkernel.utils.configure import get_as_int
+from inex.utils.configure import get_as_int
 
 
 class Extractor:

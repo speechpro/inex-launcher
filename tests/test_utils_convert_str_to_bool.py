@@ -1,5 +1,5 @@
 import unittest
-from mkernel.utils.convert import str_to_bool
+from inex.utils.convert import str_to_bool
 
 
 class UtilsConvertStrToBool(unittest.TestCase):

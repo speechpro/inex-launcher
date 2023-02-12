@@ -1,5 +1,5 @@
 import logging
-from mkernel.utils.configure import resolve_option, create_plugin
+from inex.utils.configure import resolve_option, create_plugin
 
 
 class Engine:

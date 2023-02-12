@@ -5,8 +5,8 @@ import datetime
 import logging
 import argparse
 from omegaconf import OmegaConf
-from mkernel.utils.configure import configure_logging, load_config
-from mkernel.engine import Engine
+from inex.utils.configure import configure_logging, load_config
+from inex.engine import Engine
 
 
 '''
@@ -79,9 +79,9 @@ def main():
     logging.info(state['command_line'])
     state['config_path'] = args.config_path
 
-    logging.debug('Creating mkernel engine')
+    logging.debug('Creating inex engine')
     engine = Engine(config=config, state=state)
-    logging.debug('Starting mkernel execution')
+    logging.debug('Starting inex execution')
     engine()
 
     time_total = int(time.time() - time_total)

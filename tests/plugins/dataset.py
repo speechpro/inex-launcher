@@ -1,6 +1,6 @@
 import logging
 from random import randint
-from mkernel.utils.configure import get_as_is, get_as_int
+from inex.utils.configure import get_as_is, get_as_int
 
 
 class Dataset:

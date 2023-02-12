@@ -3,7 +3,7 @@ import sys
 import logging
 from omegaconf import OmegaConf
 from logging import StreamHandler, FileHandler
-from mkernel.utils.convert import str_to_bool
+from inex.utils.convert import str_to_bool
 
 
 def configure_logging(log_level, log_path=None):
