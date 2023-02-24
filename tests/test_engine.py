@@ -2,7 +2,7 @@ import unittest
 from inex.engine import Engine
 
 
-class MkernelEngine(unittest.TestCase):
+class InexEngine(unittest.TestCase):
     config1 = {
         'plugins': [
           'features',

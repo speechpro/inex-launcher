@@ -1,3 +1,5 @@
+# inex -l INFO tests/configs/message.yaml
+
 plugins:
   - message
 start: plugins.message

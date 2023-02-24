@@ -1,50 +1,24 @@
 import re
 import sys
-import time
-import datetime
 import logging
 import argparse
 from omegaconf import OmegaConf
+from datetime import datetime, timedelta
 from inex.utils.configure import configure_logging, load_config
 from inex.engine import Engine
 
 
-'''
-
--l DEBUG tests/configs/message.yaml
--l DEBUG tests/configs/compute1.yaml
--l DEBUG tests/configs/compute2.yaml
-
--l DEBUG
- -m tests/configs/part2.yaml
- -m tests/configs/part3.yaml
- -m tests/configs/part4.yaml
- tests/configs/part1.yaml
-
--l DEBUG
- -u "generator1.options.a=100"
- -u "generator1.options.b=200"
- tests/configs/compute1.yaml
-
--l DEBUG
- -o "generator1.options.a=100"
- -o "generator1.options.b=200"
- tests/configs/compute1.yaml
-
-'''
-
-
 def main():
-    time_total = time.time()
+    begin_time = datetime.now()
 
-    parser = argparse.ArgumentParser(description='Microkernel')
-    parser.add_argument('--log-level', '-l', type=str, default='WARNING', help='Set the root logger level.')
-    parser.add_argument('--log-path', '-g', type=str, help='Path to the log-file.')
-    parser.add_argument('--sys-paths', '-s', type=str, help='Paths to add to the list of system paths (sys.path).')
-    parser.add_argument('--merge', '-m', type=str, action='append', help='Path to the configuration file to be merged with the main config.')
-    parser.add_argument('--update', '-u', type=str, action='append', help='Option to be updated (in "dot" notation: "key1.key2=value").')
-    parser.add_argument('--override', '-o', type=str, action='append', help='Deprecated! Same as --update. Kept for backward compatibility.')
-    parser.add_argument('config_path', type=str, help='Path to the configuration file (in YAML or JSON) or string with configuration in YAML.')
+    parser = argparse.ArgumentParser(description='InEx')
+    parser.add_argument('--log-level', '-l', type=str, default='WARNING', help='set the root logger level')
+    parser.add_argument('--log-path', '-g', type=str, help='path to the log-file')
+    parser.add_argument('--sys-paths', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
+    parser.add_argument('--merge', '-m', type=str, action='append', help='path to the configuration file to be merged with the main config')
+    parser.add_argument('--update', '-u', type=str, action='append', help='option to be updated (in "dot" notation: "key1.key2=value")')
+    parser.add_argument('--override', '-o', type=str, action='append', help='deprecated, same as --update, kept for backward compatibility')
+    parser.add_argument('config_path', type=str, help='path to the configuration file (in YAML or JSON) or string with configuration in YAML')
     args = parser.parse_args()
 
     configure_logging(log_level=args.log_level, log_path=args.log_path)
@@ -84,10 +58,11 @@ def main():
     logging.debug('Starting inex execution')
     engine()
 
-    time_total = int(time.time() - time_total)
-    time_total = f'{datetime.timedelta(seconds=time_total)} ({int(time_total)} sec)'
-    logging.info(f'Total time: {time_total}')
-    logging.info(f'Finished')
+    end_time = datetime.now()
+    duration = timedelta(seconds=round((end_time - begin_time).total_seconds()))
+    logging.info(f'Started at {begin_time.date()} {begin_time.strftime("%H:%M:%S")}')
+    logging.info(f'Finished at {end_time.date()} {end_time.strftime("%H:%M:%S")}')
+    logging.info(f'Total time {duration} ({duration.total_seconds():.0f} sec)')
 
 
 if __name__ == '__main__':

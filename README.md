@@ -1,1 +1,1 @@
-# inex: Initialize & Execute
+# InEx: Initialize & Execute
