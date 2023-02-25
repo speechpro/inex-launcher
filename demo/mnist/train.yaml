@@ -1,28 +1,19 @@
 #!/bin/env inex
 
-# ./config.yaml -s . -m mlp.yaml
-# ./config.yaml -s . -m effnet.yaml
-# ./config.yaml -s . -m effnet.yaml -u lr=0.0001 -u max_epochs=5
-# ./config.yaml -s . -m effnet.yaml -u lr=0.0001 -u batch_size=64 -u max_epochs=5 -u train_loader.options.num_workers=4
-# ./config.yaml -s . -m effnet.yaml -u lr=0.0001 -u batch_size=64 -u max_epochs=5 -u train_loader.options.num_workers=4 -u model.options.dropout_rate=0.2
+# ./train.yaml -s . -m mlp.yaml
+# ./train.yaml -s . -m effnet.yaml
+# ./train.yaml -s . -m effnet.yaml -u lr=0.0004 -u num_epochs=5
+# ./train.yaml -s . -m effnet.yaml -u lr=0.00064 -u batch_size=64 -u num_epochs=10 -u train_loader.options.num_workers=4
+# ./train.yaml -s . -m effnet.yaml -u lr=0.00064 -u batch_size=64 -u num_epochs=10 -u train_loader.options.num_workers=4 -u model.options.dropout_rate=0.2
 
-data_dir: /g/work/coding/inex/demo/mnist/data
-train_dir: /g/work/coding/inex/demo/mnist/train
-
-#channels: 1
-#width: 28
-#height: 28
-#
-#hidden_size: 128
-#dropout: 0.1
-
-num_classes: 10
-
-batch_size: 32
-lr: 2e-4
+data_dir: data
+train_dir: train
 
 accelerator: gpu
-max_epochs: 3
+num_classes: 10
+batch_size: 32
+lr: 0.0002
+num_epochs: 3
 
 plugins:
   - to_tensor
@@ -35,9 +26,11 @@ plugins:
   - model
   - parameters
   - optimizer
+  - scheduler
   - criterion
   - accuracy
   - module
+  - checkpoint
   - logger
   - progress
   - trainer
@@ -88,16 +81,6 @@ valid_loader:
   options:
     batch_size: ${batch_size}
 
-#model:
-#  module: models/MLP
-#  options:
-#    channels: ${channels}
-#    width: ${width}
-#    height: ${height}
-#    hidden_size: ${hidden_size}
-#    num_classes: ${num_classes}
-#    dropout: ${dropout}
-
 parameters:
   module: plugins.model/parameters
 
@@ -107,6 +90,15 @@ optimizer:
     params: plugins.parameters
   options:
     lr: ${lr}
+
+scheduler:
+  module: torch.optim.lr_scheduler/OneCycleLR
+  imports:
+    optimizer: plugins.optimizer
+  exports: []
+  options:
+    max_lr: ${lr}
+    total_steps: ${num_epochs}
 
 criterion:
   module: torch.nn/NLLLoss
@@ -122,8 +114,17 @@ module:
   imports:
     model: plugins.model
     optimizer: plugins.optimizer
+    scheduler: plugins.scheduler
     criterion: plugins.criterion
     accuracy: plugins.accuracy
+
+checkpoint:
+  module: pytorch_lightning.callbacks/ModelCheckpoint
+  options:
+    dirpath: ${train_dir}
+    monitor: 'val_acc'
+    mode: 'max'
+    save_top_k: 3
 
 logger:
   module: pytorch_lightning.loggers/CSVLogger
@@ -139,15 +140,10 @@ trainer:
   module: pytorch_lightning/Trainer
   imports:
     logger: plugins.logger
-    callbacks: [plugins.progress]
+    callbacks: [plugins.progress, plugins.checkpoint]
   options:
     accelerator: ${accelerator}
-    max_epochs: ${max_epochs}
-
-#execute:
-#  method: inex.helpers/show
-#  imports:
-#    module: plugins.trainer
+    max_epochs: ${num_epochs}
 
 execute:
   method: plugins.trainer/fit

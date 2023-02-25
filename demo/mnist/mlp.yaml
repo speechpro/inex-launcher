@@ -1,11 +1,12 @@
-max_epochs: 5
-
 channels: 1
 width: 28
 height: 28
-
 hidden_size: 128
 dropout: 0.1
+batch_size: 64
+num_epochs: 5
+
+train_dir: train_mlp_${lr}_${batch_size}
 
 model:
   module: models/MLP

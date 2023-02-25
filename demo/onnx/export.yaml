@@ -7,6 +7,14 @@
 #  model.set_swish(memory_efficient=False)
 #  torch.onnx.export(model, dummy_input, "test-b1.onnx", verbose=True)
 
+# ./export.yaml
+# ./export.yaml -l DEBUG
+# ./export.yaml -u model_name=efficientnet-b1
+# ./export.yaml -u execute.options.verbose=true
+
+model_name: efficientnet-b0
+model_path: ${model_name}.onnx
+
 plugins:
   - model
   - set_swish
@@ -15,7 +23,7 @@ plugins:
 model:
   module: efficientnet_pytorch/EfficientNet.from_pretrained
   options:
-    model_name: efficientnet-b0
+    model_name: ${model_name}
 
 set_swish:
   module: plugins.model/set_swish
@@ -33,4 +41,4 @@ execute:
     model: plugins.model
     args: plugins.tensor
   options:
-    f: model.onnx
+    f: ${model_path}

@@ -1,0 +1,31 @@
+#!/bin/env inex
+
+plugins:
+  - tensor
+  - sum
+
+tensor:
+  module: numpy/array
+  exports: [shape, dtype]
+  options:
+    object: [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    dtype: float32
+
+sum:
+  module: numpy/sum
+  imports:
+    a: plugins.tensor
+  options:
+    axis: 1
+
+execute:
+  method: inex.helpers/show
+  imports:
+    shape: tensor.shape
+    dtype: tensor.dtype
+    result: plugins.sum
+    list: [tensor.shape, tensor.dtype, plugins.sum]
+    dict:
+      shape: tensor.shape
+      dtype: tensor.dtype
+      result: plugins.sum

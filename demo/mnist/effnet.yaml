@@ -1,7 +1,9 @@
-max_epochs: 3
-
 model_name: 'efficientnet-b0'
 image_size: 28
+batch_size: 64
+num_epochs: 3
+
+train_dir: train_${model_name}_${lr}_${batch_size}
 
 model:
   module: models/EffNet
