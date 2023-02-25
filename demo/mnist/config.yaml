@@ -1,18 +1,28 @@
 #!/bin/env inex
 
+# ./config.yaml -s . -m mlp.yaml
+# ./config.yaml -s . -m effnet.yaml
+# ./config.yaml -s . -m effnet.yaml -u lr=0.0001 -u max_epochs=5
+# ./config.yaml -s . -m effnet.yaml -u lr=0.0001 -u batch_size=64 -u max_epochs=5 -u train_loader.options.num_workers=4
+# ./config.yaml -s . -m effnet.yaml -u lr=0.0001 -u batch_size=64 -u max_epochs=5 -u train_loader.options.num_workers=4 -u model.options.dropout_rate=0.2
+
 data_dir: /g/work/coding/inex/demo/mnist/data
 train_dir: /g/work/coding/inex/demo/mnist/train
 
-channels: 1
-width: 28
-height: 28
+#channels: 1
+#width: 28
+#height: 28
+#
+#hidden_size: 128
+#dropout: 0.1
 
-hidden_size: 128
 num_classes: 10
-dropout: 0.1
 
 batch_size: 32
 lr: 2e-4
+
+accelerator: gpu
+max_epochs: 3
 
 plugins:
   - to_tensor
@@ -78,15 +88,15 @@ valid_loader:
   options:
     batch_size: ${batch_size}
 
-model:
-  module: models/MLP
-  options:
-    channels: ${channels}
-    width: ${width}
-    height: ${height}
-    hidden_size: ${hidden_size}
-    num_classes: ${num_classes}
-    dropout: ${dropout}
+#model:
+#  module: models/MLP
+#  options:
+#    channels: ${channels}
+#    width: ${width}
+#    height: ${height}
+#    hidden_size: ${hidden_size}
+#    num_classes: ${num_classes}
+#    dropout: ${dropout}
 
 parameters:
   module: plugins.model/parameters
@@ -131,8 +141,8 @@ trainer:
     logger: plugins.logger
     callbacks: [plugins.progress]
   options:
-    accelerator: gpu
-    max_epochs: 3
+    accelerator: ${accelerator}
+    max_epochs: ${max_epochs}
 
 #execute:
 #  method: inex.helpers/show

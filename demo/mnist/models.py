@@ -1,5 +1,8 @@
+import torch
+import logging
 from torch import nn
 from torch.nn import functional as F
+from efficientnet_pytorch import EfficientNet
 
 
 class MLP(nn.Module):
@@ -15,6 +18,17 @@ class MLP(nn.Module):
             nn.Dropout(dropout),
             nn.Linear(hidden_size, num_classes),
         )
+
+    def forward(self, x):
+        x = self.model(x)
+        return F.log_softmax(x, dim=1)
+
+
+class EffNet(nn.Module):
+    def __init__(self, **kwargs):
+        super().__init__()
+        kwargs['in_channels'] = 1
+        self.model = EfficientNet.from_name(**kwargs)
 
     def forward(self, x):
         x = self.model(x)

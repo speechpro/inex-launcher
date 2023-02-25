@@ -1,0 +1,18 @@
+max_epochs: 5
+
+channels: 1
+width: 28
+height: 28
+
+hidden_size: 128
+dropout: 0.1
+
+model:
+  module: models/MLP
+  options:
+    channels: ${channels}
+    width: ${width}
+    height: ${height}
+    hidden_size: ${hidden_size}
+    num_classes: ${num_classes}
+    dropout: ${dropout}
