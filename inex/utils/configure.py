@@ -76,15 +76,33 @@ def create_plugin(name, config, state):
         for key, value in imports.items():
             options[key] = resolve_option(value, state)
     logging.debug(f'Creating plugin {name} from config\n{options}')
-    logging.info(f'Loading module {modname}')
-    module = __import__(modname, fromlist=[''])
-    if classname is None:
-        logging.info(f'Creating plugin {name} using class factory create() from module {modname}')
-        plugin = module.create(options)
+    if modname.startswith('plugins.') and (modname in state):
+        plugin = state[modname]
+        attribute = '__call__' if classname is None else classname
+        assert hasattr(plugin, attribute), f'Plugin {modname} does not have attribute {attribute}'
+        method = getattr(plugin, attribute)
+        plugin = method(**options)
     else:
-        logging.info(f'Creating plugin {name} with class name {classname} from module {modname}')
-        classtype = getattr(module, classname)
-        plugin = classtype(**options)
+        logging.info(f'Loading module {modname}')
+        module = __import__(modname, fromlist=[''])
+        if classname is None:
+            logging.info(f'Creating plugin {name} using class factory create() from module {modname}')
+            plugin = module.create(options)
+        else:
+            logging.info(f'Creating plugin {name} with class name {classname} from module {modname}')
+            parts = classname.split('.')
+            if len(parts) == 1:
+                assert hasattr(module, classname), f'Module {modname} does not have class {classname}'
+                classtype = getattr(module, classname)
+                plugin = classtype(**options)
+            else:
+                classname = parts[0]
+                attribute = parts[1]
+                assert hasattr(module, classname), f'Module {modname} does not have class {classname}'
+                classtype = getattr(module, classname)
+                assert hasattr(classtype, attribute), f'Class {classname} does not have attribute {attribute}'
+                method = getattr(classtype, attribute)
+                plugin = method(**options)
     if 'exports' in params:
         for attr in params['exports']:
             if hasattr(plugin, 'export'):

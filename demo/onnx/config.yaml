@@ -1,0 +1,36 @@
+#!/bin/env inex
+
+#  import torch
+#  from efficientnet_pytorch import EfficientNet
+#  model = EfficientNet.from_pretrained('efficientnet-b1')
+#  dummy_input = torch.randn(10, 3, 240, 240)
+#  model.set_swish(memory_efficient=False)
+#  torch.onnx.export(model, dummy_input, "test-b1.onnx", verbose=True)
+
+plugins:
+  - model
+  - set_swish
+  - tensor
+
+model:
+  module: efficientnet_pytorch/EfficientNet.from_pretrained
+  options:
+    model_name: efficientnet-b0
+
+set_swish:
+  module: plugins.model/set_swish
+  options:
+    memory_efficient: false
+
+tensor:
+  module: torch/randn
+  options:
+    size: [10, 3, 240, 240]
+
+execute:
+  method: torch.onnx/export
+  imports:
+    model: plugins.model
+    args: plugins.tensor
+  options:
+    f: model.onnx

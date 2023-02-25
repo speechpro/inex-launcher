@@ -1,0 +1,147 @@
+#!/bin/env inex
+
+data_dir: /g/work/coding/inex/demo/mnist/data
+train_dir: /g/work/coding/inex/demo/mnist/train
+
+channels: 1
+width: 28
+height: 28
+
+hidden_size: 128
+num_classes: 10
+dropout: 0.1
+
+batch_size: 32
+lr: 2e-4
+
+plugins:
+  - to_tensor
+  - normalize
+  - transform
+  - train_set
+  - train_loader
+  - valid_set
+  - valid_loader
+  - model
+  - parameters
+  - optimizer
+  - criterion
+  - accuracy
+  - module
+  - logger
+  - progress
+  - trainer
+
+to_tensor:
+  module: torchvision.transforms/ToTensor
+
+normalize:
+  module: torchvision.transforms/Normalize
+  options:
+    mean: [0.1307]
+    std: [0.3081]
+
+transform:
+  module: torchvision.transforms/Compose
+  imports:
+    transforms: [plugins.to_tensor, plugins.normalize]
+
+train_set:
+  module: torchvision.datasets/MNIST
+  imports:
+    transform: plugins.transform
+  options:
+    root: ${data_dir}
+    train: true
+    download: true
+
+train_loader:
+  module: torch.utils.data/DataLoader
+  imports:
+    dataset: plugins.train_set
+  options:
+    batch_size: ${batch_size}
+
+valid_set:
+  module: torchvision.datasets/MNIST
+  imports:
+    transform: plugins.transform
+  options:
+    root: ${data_dir}
+    train: false
+    download: true
+
+valid_loader:
+  module: torch.utils.data/DataLoader
+  imports:
+    dataset: plugins.valid_set
+  options:
+    batch_size: ${batch_size}
+
+model:
+  module: models/MLP
+  options:
+    channels: ${channels}
+    width: ${width}
+    height: ${height}
+    hidden_size: ${hidden_size}
+    num_classes: ${num_classes}
+    dropout: ${dropout}
+
+parameters:
+  module: plugins.model/parameters
+
+optimizer:
+  module: torch.optim/Adam
+  imports:
+    params: plugins.parameters
+  options:
+    lr: ${lr}
+
+criterion:
+  module: torch.nn/NLLLoss
+
+accuracy:
+  module: torchmetrics/Accuracy
+  options:
+    task: multiclass
+    num_classes: ${num_classes}
+
+module:
+  module: module/Module
+  imports:
+    model: plugins.model
+    optimizer: plugins.optimizer
+    criterion: plugins.criterion
+    accuracy: plugins.accuracy
+
+logger:
+  module: pytorch_lightning.loggers/CSVLogger
+  options:
+    save_dir: ${train_dir}
+
+progress:
+  module: pytorch_lightning.callbacks.progress/TQDMProgressBar
+  options:
+    refresh_rate: 20
+
+trainer:
+  module: pytorch_lightning/Trainer
+  imports:
+    logger: plugins.logger
+    callbacks: [plugins.progress]
+  options:
+    accelerator: gpu
+    max_epochs: 3
+
+#execute:
+#  method: inex.helpers/show
+#  imports:
+#    module: plugins.trainer
+
+execute:
+  method: plugins.trainer/fit
+  imports:
+    model: plugins.module
+    train_dataloaders: plugins.train_loader
+    val_dataloaders: plugins.valid_loader
