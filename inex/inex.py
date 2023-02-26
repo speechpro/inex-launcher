@@ -41,8 +41,6 @@ def main():
     dot_list = list()
     if args.update is not None:
         dot_list += args.update
-    if args.override is not None:
-        dot_list += args.override
     if len(dot_list) > 0:
         options = OmegaConf.from_dotlist(dot_list)
         config = OmegaConf.merge(config, options)
