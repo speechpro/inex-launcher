@@ -16,3 +16,4 @@ __pycache__/
 /inex/version.py
 /demo/mnist/*/
 /demo/onnx/*.onnx
+/demo/*/*.log

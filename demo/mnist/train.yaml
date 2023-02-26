@@ -10,6 +10,10 @@ data_dir: data
 train_dir: train
 
 accelerator: gpu
+devices: 1
+strategy: null
+#strategy: ddp
+
 num_classes: 10
 batch_size: 32
 lr: 0.0002
@@ -143,6 +147,8 @@ trainer:
     callbacks: [plugins.progress, plugins.checkpoint]
   options:
     accelerator: ${accelerator}
+    devices: ${devices}
+    strategy: ${strategy}
     max_epochs: ${num_epochs}
 
 execute:
