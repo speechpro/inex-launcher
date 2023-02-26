@@ -27,5 +27,5 @@ class Module(LightningModule):
         loss = self.criterion(logits, y)
         preds = torch.argmax(logits, dim=1)
         self.accuracy.update(preds, y)
-        self.log("val_loss", loss, prog_bar=True)
-        self.log("val_acc", 100 * self.accuracy, metric_attribute='accuracy', prog_bar=True)
+        self.log("val_loss", loss, prog_bar=True, sync_dist=True)
+        self.log("val_acc", 100 * self.accuracy, metric_attribute='accuracy', prog_bar=True, sync_dist=True)
