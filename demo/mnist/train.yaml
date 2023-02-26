@@ -11,8 +11,6 @@ train_dir: train
 
 accelerator: gpu
 devices: 1
-strategy: null
-#strategy: ddp
 
 num_classes: 10
 batch_size: 32
@@ -35,6 +33,7 @@ plugins:
   - accuracy
   - module
   - checkpoint
+  - strategy
   - logger
   - progress
   - trainer
@@ -130,6 +129,9 @@ checkpoint:
     mode: 'max'
     save_top_k: 3
 
+strategy:
+  module: ines.helpers/none
+
 logger:
   module: pytorch_lightning.loggers/CSVLogger
   options:
@@ -145,10 +147,10 @@ trainer:
   imports:
     logger: plugins.logger
     callbacks: [plugins.progress, plugins.checkpoint]
+    strategy: plugins.strategy
   options:
     accelerator: ${accelerator}
     devices: ${devices}
-    strategy: ${strategy}
     max_epochs: ${num_epochs}
 
 execute:

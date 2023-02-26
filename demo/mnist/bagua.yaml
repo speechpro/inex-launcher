@@ -1,0 +1,6 @@
+devices: ???
+
+strategy:
+  module: pytorch_lightning.strategies/BaguaStrategy
+  options:
+    algorithm: gradient_allreduce

@@ -1,0 +1,6 @@
+devices: ???
+
+strategy:
+  module: ines.helpers/assign
+  options:
+    value: ddp
