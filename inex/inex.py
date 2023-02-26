@@ -5,6 +5,7 @@ import argparse
 from omegaconf import OmegaConf
 from datetime import datetime, timedelta
 from inex.utils.configure import configure_logging, load_config
+from inex.version import __version__
 from inex.engine import Engine
 
 
@@ -12,12 +13,12 @@ def main():
     begin_time = datetime.now()
 
     parser = argparse.ArgumentParser(description='InEx')
+    parser.add_argument('--version', '-v', action='version', version='%(prog)s {version}'.format(version=__version__))
     parser.add_argument('--log-level', '-l', type=str, default='WARNING', help='set the root logger level')
     parser.add_argument('--log-path', '-g', type=str, help='path to the log-file')
     parser.add_argument('--sys-paths', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
     parser.add_argument('--merge', '-m', type=str, action='append', help='path to the configuration file to be merged with the main config')
-    parser.add_argument('--update', '-u', type=str, action='append', help='option to be updated (in "dot" notation: "key1.key2=value")')
-    parser.add_argument('--override', '-o', type=str, action='append', help='deprecated, same as --update, kept for backward compatibility')
+    parser.add_argument('--update', '-u', type=str, action='append', help='update or set value for some parameter (use "dot" notation: "key1.key2=value")')
     parser.add_argument('config_path', type=str, help='path to the configuration file (in YAML or JSON) or string with configuration in YAML')
     args = parser.parse_args()
 

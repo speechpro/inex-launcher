@@ -1,7 +1,0 @@
-generator2:
-  module: tests.plugins.generator/Generator
-  imports: {}
-  exports: [value]
-  options:
-    a: 11
-    b: 20

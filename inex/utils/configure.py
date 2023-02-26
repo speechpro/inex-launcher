@@ -3,7 +3,6 @@ import sys
 import logging
 from omegaconf import OmegaConf
 from logging import StreamHandler, FileHandler
-from inex.utils.convert import str_to_bool
 
 
 def configure_logging(log_level, log_path=None):
@@ -114,35 +113,3 @@ def create_plugin(name, config, state):
             else:
                 assert False, f'Plugin {type(plugin)} does not have attribute {attr}'
     state[f'plugins.{name}'] = plugin
-
-
-def get_as_is(config, key, default=None, required=False):
-    if key in config:
-        return config[key]
-    else:
-        assert not required, f'Failed to find {key} in config\n{config}'
-        return default
-
-
-def get_as_bool(config, key, default=False, required=False):
-    value = get_as_is(config, key, default, required)
-    if isinstance(value, str):
-        return str_to_bool(value)
-    else:
-        return bool(value)
-
-
-def get_as_type(config, key, dtype, default, required):
-    return dtype(get_as_is(config, key, default, required))
-
-
-def get_as_str(config, key, default=None, required=False):
-    return get_as_type(config, key, str, default, required)
-
-
-def get_as_int(config, key, default=None, required=False):
-    return get_as_type(config, key, int, default, required)
-
-
-def get_as_float(config, key, default=None, required=False):
-    return get_as_type(config, key, float, default, required)

@@ -44,10 +44,9 @@ setup(
         "Bug Tracker": "https://nid-gitlab.ad.speechpro.com/asr2/inex/issues",
     },
     install_requires=[
-        'omegaconf>=2.2.3',
-        'pytest>=7.2.0',
-        'tox>=3.27.1',
-        'numpy>=1.23.5',
+        'omegaconf',
+        'pytest',
+        'tox',
     ],
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
