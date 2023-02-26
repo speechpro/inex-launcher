@@ -130,7 +130,7 @@ checkpoint:
     save_top_k: 3
 
 strategy:
-  module: ines.helpers/none
+  module: inex.helpers/none
 
 logger:
   module: pytorch_lightning.loggers/CSVLogger
