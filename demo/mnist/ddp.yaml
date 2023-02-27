@@ -1,6 +1,7 @@
 devices: ???
+num_nodes: ???
 
 strategy:
-  module: inex.helpers/assign
+  module: pytorch_lightning.strategies.ddp/DDPStrategy
   options:
-    value: ddp
+    find_unused_parameters: false

@@ -11,6 +11,7 @@ train_dir: train
 
 accelerator: gpu
 devices: 1
+num_nodes: 1
 
 num_classes: 10
 batch_size: 32
@@ -151,6 +152,7 @@ trainer:
   options:
     accelerator: ${accelerator}
     devices: ${devices}
+    num_nodes: ${num_nodes}
     max_epochs: ${num_epochs}
 
 execute:
