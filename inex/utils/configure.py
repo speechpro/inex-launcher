@@ -77,10 +77,12 @@ def create_plugin(name, config, state):
     logging.debug(f'Creating plugin {name} from config\n{options}')
     if modname.startswith('plugins.') and (modname in state):
         plugin = state[modname]
-        attribute = '__call__' if classname is None else classname
-        assert hasattr(plugin, attribute), f'Plugin {modname} does not have attribute {attribute}'
-        method = getattr(plugin, attribute)
-        plugin = method(**options)
+        if classname is None:
+            plugin = plugin(**options)
+        else:
+            assert hasattr(plugin, classname), f'Plugin {modname} does not have attribute {classname}'
+            method = getattr(plugin, classname)
+            plugin = method(**options)
     else:
         logging.info(f'Loading module {modname}')
         module = __import__(modname, fromlist=[''])
