@@ -33,7 +33,7 @@ srun \\
     -u train_loader.options.pin_memory=true \\
     -u valid_loader.options.num_workers=4 \\
     -u valid_loader.options.pin_memory=true \\
-    -u progress.options.refresh_rate=20 || exit 1
+    -u progress.options.refresh_rate=0 || exit 1
 EOF
 chmod +x $script
 
