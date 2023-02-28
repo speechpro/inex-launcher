@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 from datetime import datetime, timedelta
 from inex.utils.configure import configure_logging, load_config
 from inex.version import __version__
-from inex.engine import Engine
+from inex.engine import execute
 
 
 def main():
@@ -28,10 +28,10 @@ def main():
         paths = re.split(r'[:;,|]', args.sys_paths)
         for path in paths:
             if path not in sys.path:
-                logging.info(f'Adding {path} to sys.path')
+                logging.debug(f'Adding {path} to sys.path')
                 sys.path.append(path)
 
-    logging.info('Reading configuration')
+    logging.debug('Reading configuration')
     config = load_config(args.config_path)
     if args.merge is not None:
         configs = [config]
@@ -45,23 +45,21 @@ def main():
         options = OmegaConf.from_dotlist(dot_list)
         config = OmegaConf.merge(config, options)
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
-    logging.info(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
+    logging.debug(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
 
     state = dict()
     state['command_line'] = ' '.join(sys.argv)
-    logging.info(state['command_line'])
+    logging.debug(state['command_line'])
     state['config_path'] = args.config_path
 
-    logging.debug('Creating inex engine')
-    engine = Engine(config=config, state=state)
-    logging.debug('Starting inex execution')
-    engine()
+    logging.debug('Starting InEx execution')
+    execute(config=config, state=state)
 
     end_time = datetime.now()
     duration = timedelta(seconds=round((end_time - begin_time).total_seconds()))
-    logging.info(f'Started at {begin_time.date()} {begin_time.strftime("%H:%M:%S")}')
-    logging.info(f'Finished at {end_time.date()} {end_time.strftime("%H:%M:%S")}')
-    logging.info(f'Total time {duration} ({duration.total_seconds():.0f} sec)')
+    logging.debug(f'Started at {begin_time.date()} {begin_time.strftime("%H:%M:%S")}')
+    logging.debug(f'Finished at {end_time.date()} {end_time.strftime("%H:%M:%S")}')
+    logging.debug(f'Total time {duration} ({duration.total_seconds():.0f} sec)')
 
 
 if __name__ == '__main__':

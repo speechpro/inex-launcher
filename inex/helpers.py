@@ -1,3 +1,4 @@
+import logging
 
 
 def none():
@@ -22,6 +23,20 @@ def false():
 
 def assign(value):
     return value
+
+
+def attribute(modname, attname):
+    logging.debug(f'Loading module {modname}')
+    module = __import__(modname, fromlist=[''])
+    assert hasattr(module, attname), f'Module {modname} does not have class {attname}'
+    return getattr(module, attname)
+
+
+def posit_args(modname, attname, arguments):
+    logging.debug(f'Loading module {modname}')
+    module = __import__(modname, fromlist=[''])
+    assert hasattr(module, attname), f'Module {modname} does not have class {attname}'
+    return getattr(module, attname)(*arguments)
 
 
 def show(**kwargs):

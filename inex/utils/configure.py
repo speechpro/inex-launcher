@@ -84,13 +84,13 @@ def create_plugin(name, config, state):
             method = getattr(plugin, classname)
             plugin = method(**options)
     else:
-        logging.info(f'Loading module {modname}')
+        logging.debug(f'Loading module {modname}')
         module = __import__(modname, fromlist=[''])
         if classname is None:
-            logging.info(f'Creating plugin {name} using class factory create() from module {modname}')
+            logging.debug(f'Creating plugin {name} using class factory create() from module {modname}')
             plugin = module.create(options)
         else:
-            logging.info(f'Creating plugin {name} with class name {classname} from module {modname}')
+            logging.debug(f'Creating plugin {name} with class name {classname} from module {modname}')
             parts = classname.split('.')
             if len(parts) == 1:
                 assert hasattr(module, classname), f'Module {modname} does not have class {classname}'
@@ -110,8 +110,6 @@ def create_plugin(name, config, state):
                 state[f'{name}.{attr}'] = plugin.export(attr)
             elif hasattr(plugin, attr):
                 state[f'{name}.{attr}'] = getattr(plugin, attr)
-            elif hasattr(plugin, 'get'):
-                state[f'{name}.{attr}'] = plugin.get(attr)
             else:
                 assert False, f'Plugin {type(plugin)} does not have attribute {attr}'
     state[f'plugins.{name}'] = plugin
