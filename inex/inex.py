@@ -57,9 +57,9 @@ def main():
 
     end_time = datetime.now()
     duration = timedelta(seconds=round((end_time - begin_time).total_seconds()))
-    logging.debug(f'Started at {begin_time.date()} {begin_time.strftime("%H:%M:%S")}')
-    logging.debug(f'Finished at {end_time.date()} {end_time.strftime("%H:%M:%S")}')
-    logging.debug(f'Total time {duration} ({duration.total_seconds():.0f} sec)')
+    print(f'\n# Started at {begin_time.date()} {begin_time.strftime("%H:%M:%S")}', file=sys.stderr)
+    print(f'# Finished at {end_time.date()} {end_time.strftime("%H:%M:%S")}', file=sys.stderr)
+    print(f'# Total time {duration} ({duration.total_seconds():.0f} sec)', file=sys.stderr)
 
 
 if __name__ == '__main__':
