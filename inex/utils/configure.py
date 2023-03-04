@@ -75,6 +75,7 @@ def create_plugin(name, config, state):
         for key, value in imports.items():
             if isinstance(value, str):
                 assert value in state, f'Failed to resolve value {value}'
+                options[key] = state[value]
             else:
                 options[key] = resolve_option(value, state)
     logging.debug(f'Creating plugin {name} from config\n{options}')

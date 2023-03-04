@@ -38,6 +38,7 @@ def execute(config, state):
         for key, value in imports.items():
             if isinstance(value, str):
                 assert value in state, f'Failed to resolve value {value}'
+                params[key] = state[value]
             else:
                 params[key] = resolve_option(value, state)
     method(**params)
