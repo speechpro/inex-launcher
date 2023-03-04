@@ -36,5 +36,8 @@ def execute(config, state):
     if 'imports' in exopts:
         imports = exopts['imports']
         for key, value in imports.items():
-            params[key] = resolve_option(value, state)
+            if isinstance(value, str):
+                assert value in state, f'Failed to resolve value {value}'
+            else:
+                params[key] = resolve_option(value, state)
     method(**params)

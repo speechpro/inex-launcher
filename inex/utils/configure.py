@@ -73,7 +73,10 @@ def create_plugin(name, config, state):
     if 'imports' in params:
         imports = params['imports']
         for key, value in imports.items():
-            options[key] = resolve_option(value, state)
+            if isinstance(value, str):
+                assert value in state, f'Failed to resolve value {value}'
+            else:
+                options[key] = resolve_option(value, state)
     logging.debug(f'Creating plugin {name} from config\n{options}')
     if modname.startswith('plugins.') and (modname in state):
         plugin = state[modname]
