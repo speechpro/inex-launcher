@@ -25,17 +25,30 @@ def assign(value):
     return value
 
 
+def evaluate(
+        expression,
+        a=None, b=None, c=None, d=None,
+        x=None, y=None, z=None, w=None,
+        i=None, j=None, k=None,
+        m=None, n=None,
+):
+    return eval(expression)
+
+
 def attribute(modname, attname):
     logging.debug(f'Loading module {modname}')
     module = __import__(modname, fromlist=[''])
-    assert hasattr(module, attname), f'Module {modname} does not have class {attname}'
+    assert hasattr(module, attname), f'Module {modname} does not have attribute {attname}'
     return getattr(module, attname)
 
 
 def posit_args(modname, attname, arguments):
-    logging.debug(f'Loading module {modname}')
-    module = __import__(modname, fromlist=[''])
-    assert hasattr(module, attname), f'Module {modname} does not have class {attname}'
+    if isinstance(modname, str):
+        logging.debug(f'Loading module {modname}')
+        module = __import__(modname, fromlist=[''])
+    else:
+        module = modname
+    assert hasattr(module, attname), f'Module {modname} does not have attribute {attname}'
     return getattr(module, attname)(*arguments)
 
 
