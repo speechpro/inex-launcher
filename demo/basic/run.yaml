@@ -5,7 +5,8 @@ plugins:
   - sum
   - item
   - colors
-  - choice
+  - choice1
+  - choice2
 
 tensor:
   module: numpy/array
@@ -38,13 +39,18 @@ colors:
       lime: '#BFFF00'
       mabel: '#D9F7FF'
 
-choice:
+choice1:
   module: inex.helpers/posit_args
   imports:
     modname: plugins.colors
   options:
     attname: __getitem__
     arguments: [lime]
+
+choice2:
+  module: copy/copy^coral
+  imports:
+    x: plugins.colors
 
 execute:
   method: inex.helpers/show
@@ -53,7 +59,9 @@ execute:
     dtype: tensor.dtype
     result: plugins.sum
     value: plugins.item
-    color: plugins.choice
+    color1: plugins.choice1
+    color2: plugins.choice2
+    color3: plugins.colors^mabel
     list: [tensor.shape, tensor.dtype, plugins.sum]
     dict:
       shape: tensor.shape

@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import logging
 from omegaconf import OmegaConf
@@ -39,6 +40,10 @@ def load_config(conf_path):
     return config
 
 
+def optional_int(value):
+    return value if re.match(r'^-?\d+$', value) is None else int(value)
+
+
 def resolve_option(option, state):
     if isinstance(option, list):
         for i, value in enumerate(option):
@@ -62,9 +67,16 @@ def create_plugin(name, config, state):
     params = config[name]
     assert 'module' in params, f'Failed find module for plugin {name} in config\n{config}'
     modname = params['module']
+    parts = modname.split('^')
+    if len(parts) == 1:
+        index = None
+    else:
+        assert len(parts) == 2, f'Wrong module index format ({parts=}) for plugin {name} in config\n{config}'
+        modname = parts[0]
+        index = parts[1]
     parts = modname.split('/')
     if len(parts) > 1:
-        assert len(parts) == 2, f'Wrong module name format ({modname}) for plugin {name} in config\n{config}'
+        assert len(parts) == 2, f'Wrong module name format ({parts=}) for plugin {name} in config\n{config}'
         modname = parts[0]
         classname = parts[1]
     else:
@@ -74,8 +86,19 @@ def create_plugin(name, config, state):
         imports = params['imports']
         for key, value in imports.items():
             if isinstance(value, str):
-                assert value in state, f'Failed to resolve value {value}'
-                options[key] = state[value]
+                parts = value.split('^')
+                if len(parts) == 1:
+                    idx = None
+                else:
+                    assert len(parts) == 2, f'Wrong importing value index format ({parts=}) for plugin {name} in config\n{config}'
+                    value = parts[0]
+                    idx = parts[1]
+                assert value in state, f'Failed to resolve importing value {value} for plugin {name} in config\n{config}'
+                value = state[value]
+                if idx is not None:
+                    assert hasattr(value, '__getitem__'), f'Imported class {type(value)} does not have attribute __getitem__ for plugin {name} in config\n{config}'
+                    value = value[optional_int(idx)]
+                options[key] = value
             else:
                 options[key] = resolve_option(value, state)
     logging.debug(f'Creating plugin {name} from config\n{options}')
@@ -84,7 +107,7 @@ def create_plugin(name, config, state):
         if classname is None:
             plugin = plugin(**options)
         else:
-            assert hasattr(plugin, classname), f'Plugin {modname} does not have attribute {classname}'
+            assert hasattr(plugin, classname), f'Plugin {modname} does not have attribute {classname} for plugin {name} in config\n{config}'
             method = getattr(plugin, classname)
             plugin = method(**options)
     else:
@@ -97,17 +120,20 @@ def create_plugin(name, config, state):
             logging.debug(f'Creating plugin {name} with class name {classname} from module {modname}')
             parts = classname.split('.')
             if len(parts) == 1:
-                assert hasattr(module, classname), f'Module {modname} does not have class {classname}'
+                assert hasattr(module, classname), f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
                 classtype = getattr(module, classname)
                 plugin = classtype(**options)
             else:
                 classname = parts[0]
                 attribute = parts[1]
-                assert hasattr(module, classname), f'Module {modname} does not have class {classname}'
+                assert hasattr(module, classname), f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
                 classtype = getattr(module, classname)
-                assert hasattr(classtype, attribute), f'Class {classname} does not have attribute {attribute}'
+                assert hasattr(classtype, attribute), f'Class {classname} does not have attribute {attribute} for plugin {name} in config\n{config}'
                 method = getattr(classtype, attribute)
                 plugin = method(**options)
+    if index is not None:
+        assert hasattr(plugin, '__getitem__'), f'Class {type(plugin)} does not have attribute __getitem__ for plugin {name} in config\n{config}'
+        plugin = plugin[optional_int(index)]
     if 'exports' in params:
         for attr in params['exports']:
             if hasattr(plugin, 'export'):
@@ -115,5 +141,5 @@ def create_plugin(name, config, state):
             elif hasattr(plugin, attr):
                 state[f'{name}.{attr}'] = getattr(plugin, attr)
             else:
-                assert False, f'Plugin {type(plugin)} does not have attribute {attr}'
+                assert False, f'Plugin {type(plugin)} does not have attribute {attr} for plugin {name} in config\n{config}'
     state[f'plugins.{name}'] = plugin
