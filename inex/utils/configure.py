@@ -2,28 +2,38 @@ import os
 import re
 import sys
 import logging
+import logging.config
 from omegaconf import OmegaConf
-from logging import StreamHandler, FileHandler
 
 
 def configure_logging(log_level, log_path=None):
-    log_level = {
-        'DEBUG': logging.DEBUG,
-        'INFO': logging.INFO,
-        'WARNING': logging.WARNING,
-        'ERROR': logging.ERROR,
-        'CRITICAL': logging.CRITICAL
-    }[log_level]
-    handlers = [StreamHandler()]
+    handlers =  {
+            "inex_out": {
+                "class": "logging.StreamHandler",
+                "formatter": "inex_basic",
+                "stream": "ext://sys.stdout",
+            }
+    }
     if log_path is not None:
-        handlers.append(FileHandler(log_path, mode='w', encoding='utf-8'))
-    logging.basicConfig(
-        level=log_level,
-        datefmt='%Y-%m-%d %H:%M:%S',
-        format='%(asctime)s %(name)s %(pathname)s:%(lineno)d - %(levelname)s - %(message)s',
-        handlers=handlers
-    )
+        handlers['inex_file'] = {
+                "class": "logging.FileHandler",
+                "formatter": "inex_basic",
+                "filename": log_path,
+                "mode": "w",
+                "encoding": "utf-8"
+        }
+    CONFIG = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {"inex_basic": {"format": '%(asctime)s %(name)s %(pathname)s:%(lineno)d - %(levelname)s - %(message)s'}},
+        "handlers": handlers,
+        "loggers": {"inex": {"handlers": ["inex_out"], "level": log_level}},
+        "root": {"handlers": ["inex_out"], "level": log_level}
+    }
+    logging.config.dictConfig(CONFIG)
 
+def get_inex_logger():
+    return logging.getLogger('inex')
 
 def load_config(conf_path):
     assert conf_path is not None, 'Failed to load config: config path is None'
