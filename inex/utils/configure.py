@@ -27,8 +27,8 @@ def configure_logging(log_level, log_path=None):
         "disable_existing_loggers": False,
         "formatters": {"inex_basic": {"format": '%(asctime)s %(name)s %(pathname)s:%(lineno)d - %(levelname)s - %(message)s'}},
         "handlers": handlers,
-        "loggers": {"inex": {"handlers": ["inex_out"], "level": log_level}},
-        "root": {"handlers": ["inex_out"], "level": log_level}
+        "loggers": {"inex": {"handlers": handlers.keys(), "level": log_level}},
+        "root": {"handlers": handlers.keys(), "level": log_level}
     }
     logging.config.dictConfig(CONFIG)
 
