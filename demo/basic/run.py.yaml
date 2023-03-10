@@ -1,0 +1,93 @@
+#!/bin/env inex
+
+plugins:
+  - tensor
+  - sum
+  - item
+  - colors
+  - choice1
+  - choice2
+
+# from numpy import array
+# plugins_tensor = array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype='float32')
+tensor:
+  module: numpy/array
+  exports: [shape, dtype]
+  options:
+    object: [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    dtype: float32
+
+# from numpy import sum
+# plugins_sum = sum(a=plugins_tensor, axis=1)
+sum:
+  module: numpy/sum
+  imports:
+    a: plugins.tensor
+  options:
+    axis: 1
+
+# from inex.helpers import evaluate
+# plugins_item = evaluate(w=plugins_tensor, i=2, j=1, expression='w[i, j]')
+item:
+  module: inex.helpers/evaluate
+  imports:
+    w: plugins.tensor
+  options:
+    i: 2
+    j: 1
+    expression: 'w[i, j]'
+
+# from inex.helpers import assign
+# plugins_colors = assign(value={'coral': '#FF7F50', 'lime': '#BFFF00', 'mabel': '#D9F7FF'})
+colors:
+  module: inex.helpers/assign
+  options:
+    value:
+      coral: '#FF7F50'
+      lime: '#BFFF00'
+      mabel: '#D9F7FF'
+
+# from inex.helpers import posit_args
+# plugins_choice1 = posit_args(modname=plugins_colors, attname='__getitem__', arguments=['lime'])
+choice1:
+  module: inex.helpers/posit_args
+  imports:
+    modname: plugins.colors
+  options:
+    attname: __getitem__
+    arguments: [lime]
+
+# from copy import copy
+# plugins_choice2 = copy(x=plugins_colors)['coral']
+choice2:
+  module: copy/copy^coral
+  imports:
+    x: plugins.colors
+
+# from inex.helpers import show
+# show(
+#     shape=plugins_tensor.shape,
+#     dtype=plugins_tensor.dtype,
+#     result=plugins_sum,
+#     value=plugins_item,
+#     color1=plugins_choice1,
+#     color2=plugins_choice2,
+#     color3=plugins_colors['mabel'],
+#     list=[plugins_tensor.shape, plugins_tensor.dtype, plugins_sum],
+#     dict={'shape': plugins_tensor.shape, 'dtype': plugins_tensor.dtype, 'result': plugins_sum},
+# )
+execute:
+  method: inex.helpers/show
+  imports:
+    shape: tensor.shape
+    dtype: tensor.dtype
+    result: plugins.sum
+    value: plugins.item
+    color1: plugins.choice1
+    color2: plugins.choice2
+    color3: plugins.colors^mabel
+    list: [tensor.shape, tensor.dtype, plugins.sum]
+    dict:
+      shape: tensor.shape
+      dtype: tensor.dtype
+      result: plugins.sum

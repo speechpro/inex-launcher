@@ -1,0 +1,474 @@
+#!/bin/env inex
+
+model_id: 16
+model_name: baseline
+data_dir: data_06
+
+random_seed: 0
+cudnn_enabled: true
+cudnn_benchmark: false
+cudnn_deterministic: true
+
+root_dir: /mnt/asr/prisyach/CHIME7/espnet/egs2/chime7_task1/asr1
+path_tokens: ${root_dir}/data/en_token_list/bpe_unigram500/tokens.txt
+path_bpe_model: ${root_dir}/data/en_token_list/bpe_unigram500/bpe.model
+download_dir: hub
+
+train_wave: ${data_dir}/train/wav.scp
+train_wave_shape: ${data_dir}/train/speech_shape
+train_text: ${data_dir}/train/text
+train_text_shape: ${data_dir}/train/text_shape.bpe
+
+valid_wave: ${data_dir}/valid/wav.scp
+valid_wave_shape: ${data_dir}/valid/speech_shape
+valid_text: ${data_dir}/valid/text
+valid_text_shape: ${data_dir}/valid/text_shape.bpe
+
+train_dir: exp/train_${model_id}
+
+accelerator: gpu
+devices: 1
+num_nodes: 1
+
+batch_size: 32
+batch_bins: 1000000
+fold_lengths: [80000, 150]
+num_workers: 1
+pin_memory: true
+num_epochs: 8
+stop_after: 1
+log_aver: 2000
+resume_training: true
+val_check_interval: 0.1
+
+lr: 0.0004
+warmup_steps: 8500
+
+project_name: 'YK-CHiME7-ASR'
+task_name: '${model_name} #${model_id}'
+task_info: 'Model: ${model_name} #${model_id}, lr: ${lr}, warmup_steps: ${warmup_steps}, num_epochs: ${num_epochs}, batch_size: ${batch_size}, batch_bins: ${batch_bins}, fold_lengths: ${fold_lengths}, data_dir: ${data_dir}'
+
+dtype: float32
+
+plugins:
+  - clearml
+  - set_random_seed
+  - initialize_torch
+  - data_type
+  - device
+
+  - tokens
+  - preprocess_fn
+  - collate_fn
+
+  - train_dataset
+  - train_sampler
+  - train_batches
+  - train_loader
+
+  - valid_dataset
+  - valid_sampler
+  - valid_batches
+  - valid_loader
+
+  - frontend
+  - frontend_size
+  - specaug
+  - normalize
+  - preencoder
+  - preencoder_size
+  - encoder
+  - encoder_size
+  - decoder
+  - ctc
+  - model
+  - initialize
+  - model_to
+  - freeze
+  - parameters
+
+  - optimizer
+  - scheduler
+  - module
+  - strategy
+  - checkpoint
+  - progress
+  - logger
+
+clearml:
+  module: chime.plugins.logging.clearml/ClearML
+  imports:
+    command_line: command_line
+    config_path: config_path
+  exports: [project_name, task_name, task_info, task]
+  options:
+    enable: true
+    project_name: ${project_name}
+    task_name: ${task_name}
+    task_info: ${task_info}
+
+set_random_seed:
+  module: chime.plugins.asr.init_torch/set_random_seed
+  options:
+    seed: ${random_seed}
+
+initialize_torch:
+  module: chime.plugins.asr.init_torch/init_cudnn
+  options:
+    cudnn_enabled: ${cudnn_enabled}
+    cudnn_benchmark: ${cudnn_benchmark}
+    cudnn_deterministic: ${cudnn_deterministic}
+
+data_type:
+  module: inex.helpers/attribute
+  options:
+    modname: torch
+    attname: ${dtype}
+
+device:
+  module: torch/device
+  options:
+    type: cuda
+
+tokens:
+  module: chime.plugins.asr.tokens/Tokens
+  exports: [tokens, num_tokens]
+  options:
+    path: ${path_tokens}
+
+preprocess_fn:
+  module: espnet2.train.preprocessor/CommonPreprocessor
+  imports:
+    token_list: tokens.tokens
+  options:
+    train: true
+    token_type: bpe
+    bpemodel: ${path_bpe_model}
+    text_cleaner: null
+
+collate_fn:
+  module: espnet2.train.collate_fn/CommonCollateFn
+  options:
+    float_pad_value: 0.0
+    int_pad_value: -1
+
+train_path_name_type:
+  -
+    - ${train_wave}
+    - speech
+    - sound
+  -
+    - ${train_text}
+    - text
+    - text
+
+train_shapes:
+  - ${train_wave_shape}
+  - ${train_text_shape}
+
+train_dataset:
+  module: espnet2.train.dataset/ESPnetDataset
+  imports:
+    preprocess: plugins.preprocess_fn
+  options:
+    path_name_type_list: ${train_path_name_type}
+    float_dtype: ${dtype}
+    int_dtype: long
+    max_cache_size: 0.0
+    max_cache_fd: 32
+
+train_sampler:
+  module: espnet2.samplers.folded_batch_sampler/FoldedBatchSampler
+  options:
+    shape_files: ${train_shapes}
+    batch_size: ${batch_size}
+    fold_lengths: ${fold_lengths}
+    min_batch_size: 1
+    sort_in_batch: descending
+    sort_batch: descending
+    drop_last: false
+    utt2category_file: null
+
+train_batches:
+  module: chime.plugins.asr.utils/get_batches
+  imports:
+    sampler: plugins.train_sampler
+  options:
+    shuffle: true
+    seed: -1
+
+train_loader:
+  module: torch.utils.data.dataloader/DataLoader
+  imports:
+    dataset: plugins.train_dataset
+    batch_sampler: plugins.train_batches
+    collate_fn: plugins.collate_fn
+  options:
+    num_workers: ${num_workers}
+    pin_memory: ${pin_memory}
+
+valid_path_name_type:
+  -
+    - ${valid_wave}
+    - speech
+    - sound
+  -
+    - ${valid_text}
+    - text
+    - text
+
+valid_shapes:
+  - ${valid_wave_shape}
+  - ${valid_text_shape}
+
+valid_dataset:
+  module: espnet2.train.dataset/ESPnetDataset
+  imports:
+    preprocess: plugins.preprocess_fn
+  options:
+    path_name_type_list: ${valid_path_name_type}
+    float_dtype: ${dtype}
+    int_dtype: long
+    max_cache_size: 0.0
+    max_cache_fd: 32
+
+valid_sampler:
+  module: espnet2.samplers.folded_batch_sampler/FoldedBatchSampler
+  options:
+    shape_files: ${valid_shapes}
+    batch_size: ${batch_size}
+    fold_lengths: ${fold_lengths}
+    min_batch_size: 1
+    sort_in_batch: descending
+    sort_batch: descending
+    drop_last: false
+    utt2category_file: null
+
+valid_batches:
+  module: chime.plugins.asr.utils/get_batches
+  imports:
+    sampler: plugins.valid_sampler
+  options:
+    shuffle: false
+    seed: 0
+
+valid_loader:
+  module: torch.utils.data.dataloader/DataLoader
+  imports:
+    dataset: plugins.valid_dataset
+    batch_sampler: plugins.valid_batches
+    collate_fn: plugins.collate_fn
+  options:
+    num_workers: ${num_workers}
+    pin_memory: ${pin_memory}
+
+frontend:
+  module: espnet2.asr.frontend.s3prl/S3prlFrontend
+  options:
+    frontend_conf:
+      upstream: wavlm_large
+    download_dir: ${download_dir}
+    multilayer_feature: true
+    fs: 16k
+
+frontend_size:
+  module: plugins.frontend/output_size
+
+specaug:
+  module: espnet2.asr.specaug.specaug/SpecAug
+  options:
+    apply_time_warp: False
+    time_warp_window: 5
+    time_warp_mode: bicubic
+    apply_freq_mask: False
+    freq_mask_width_range: [0, 150]
+    num_freq_mask: 4
+    apply_time_mask: True
+    time_mask_width_ratio_range: [0.0, 0.15]
+    num_time_mask: 3
+
+normalize:
+  module: espnet2.layers.utterance_mvn/UtteranceMVN
+
+preencoder:
+  module: espnet2.asr.preencoder.linear/LinearProjection
+  imports:
+    input_size: plugins.frontend_size
+  options:
+    output_size: 128
+    dropout: 0.2
+
+preencoder_size:
+  module: plugins.preencoder/output_size
+
+encoder:
+  module: espnet2.asr.encoder.transformer_encoder/TransformerEncoder
+  imports:
+    input_size: plugins.preencoder_size
+  options:
+    output_size: 256
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 12
+    dropout_rate: 0.1
+    attention_dropout_rate: 0.0
+    input_layer: conv2d2
+    normalize_before: true
+
+encoder_size:
+  module: plugins.encoder/output_size
+
+decoder:
+  module: espnet2.asr.decoder.transformer_decoder/TransformerDecoder
+  imports:
+    vocab_size: tokens.num_tokens
+    encoder_output_size: plugins.encoder_size
+  options:
+    input_layer: embed
+    attention_heads: 4
+    linear_units: 2048
+    num_blocks: 6
+    dropout_rate: 0.1
+    positional_dropout_rate: 0.0
+    self_attention_dropout_rate: 0.0
+    src_attention_dropout_rate: 0.0
+
+ctc:
+  module: espnet2.asr.ctc/CTC
+  imports:
+    odim: tokens.num_tokens
+    encoder_output_size: plugins.encoder_size
+  options:
+    dropout_rate: 0.0
+    ctc_type: builtin
+    reduce: true
+    ignore_nan_grad: null
+    zero_infinity: true
+
+model:
+  module: espnet2.asr.espnet_model/ESPnetASRModel
+  imports:
+    frontend: plugins.frontend
+    specaug: plugins.specaug
+    normalize: plugins.normalize
+    preencoder: plugins.preencoder
+    encoder: plugins.encoder
+    decoder: plugins.decoder
+    ctc: plugins.ctc
+    token_list: tokens.tokens
+    vocab_size: tokens.num_tokens
+  options:
+    postencoder: null
+    joint_network: null
+    ctc_weight: 0.3
+    lsm_weight: 0.1
+    length_normalized_loss: false
+    extract_feats_in_collect_stats: false
+
+initialize:
+  module: espnet2.torch_utils.initialize/initialize
+  imports:
+    model: plugins.model
+  options:
+    init: xavier_uniform
+
+model_to:
+  module: plugins.model/to
+  imports:
+    dtype: plugins.data_type
+    device: plugins.device
+
+freeze:
+  module: chime.plugins.asr.freeze/freeze
+  imports:
+    model: plugins.model
+  options:
+    names: [frontend.upstream]
+
+parameters:
+  module: plugins.model/parameters
+
+optimizer:
+  module: torch.optim/Adam
+  imports:
+    params: plugins.parameters
+  options:
+    lr: ${lr}
+
+scheduler:
+  module: espnet2.schedulers.warmup_lr/WarmupLR
+  imports:
+    optimizer: plugins.optimizer
+  options:
+    warmup_steps: ${warmup_steps}
+
+module:
+  module: chime.plugins.asr.module/Module
+  imports:
+    model: plugins.model
+    optimizer: plugins.optimizer
+    scheduler: plugins.scheduler
+    cml_task: clearml.task
+  options:
+    log_aver: ${log_aver}
+    train_bar_keys:
+      loss: train_loss
+      acc: train_acc
+      lr: lr
+    train_log_keys:
+      loss_ctc: train_loss_ctc
+      cer_ctc: train_cer_ctc
+      loss_att: train_loss_att
+      cer: train_cer
+      wer: train_wer
+    valid_bar_keys:
+      loss: val_loss
+      acc: val_acc
+    valid_log_keys:
+      loss_ctc: val_loss_ctc
+      cer_ctc: val_cer_ctc
+      loss_att: val_loss_att
+      cer: val_cer
+      wer: val_wer
+
+strategy:
+  module: inex.helpers/none
+
+checkpoint:
+  module: pytorch_lightning.callbacks/ModelCheckpoint
+  options:
+    dirpath: ${train_dir}
+    monitor: 'val_acc'
+    mode: 'max'
+    save_top_k: 15
+
+progress:
+  module: pytorch_lightning.callbacks.progress/TQDMProgressBar
+  options:
+    refresh_rate: 5
+
+logger:
+  module: pytorch_lightning.loggers/CSVLogger
+  options:
+    save_dir: ${train_dir}
+
+execute:
+  method: chime.plugins.asr.trainer/train
+  imports:
+    module: plugins.module
+    train_data: plugins.train_loader
+    valid_data: plugins.valid_loader
+    cml_task: clearml.task
+    strategy: plugins.strategy
+    callbacks: [plugins.progress, plugins.checkpoint]
+    logger: plugins.logger
+  options:
+    num_epochs: ${num_epochs}
+    stop_after: ${stop_after}
+    resume_training: ${resume_training}
+    accelerator: ${accelerator}
+    devices: ${devices}
+    num_nodes: ${num_nodes}
+    val_check_interval: ${val_check_interval}
+    num_sanity_val_steps: 0
+    default_root_dir: ${train_dir}
