@@ -22,6 +22,10 @@ from copy import copy
 plugins_choice2 = copy(x=plugins_colors)['coral']
 
 
+from numpy import array
+plugins_array = array
+
+
 from inex.helpers import show
 show(
     shape=plugins_tensor.shape,
@@ -31,6 +35,7 @@ show(
     color1=plugins_choice1,
     color2=plugins_choice2,
     color3=plugins_colors['mabel'],
+    array=plugins_array,
     list=[plugins_tensor.shape, plugins_tensor.dtype, plugins_sum],
     dict={'shape': plugins_tensor.shape, 'dtype': plugins_tensor.dtype, 'result': plugins_sum},
 )

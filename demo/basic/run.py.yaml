@@ -64,6 +64,14 @@ choice2:
   imports:
     x: plugins.colors
 
+# from numpy import array
+# plugins_array = array
+array:
+  module: inex.helpers/attribute
+  options:
+    modname: numpy
+    attname: array
+
 # from inex.helpers import show
 # show(
 #     shape=plugins_tensor.shape,
@@ -86,6 +94,7 @@ execute:
     color1: plugins.choice1
     color2: plugins.choice2
     color3: plugins.colors^mabel
+    array: plugins.array
     list: [tensor.shape, tensor.dtype, plugins.sum]
     dict:
       shape: tensor.shape
