@@ -68,9 +68,9 @@ def _import_(plugin, config, **kwargs):
         logging.debug('Creating new cache entry for state')
         state = dict()
         _cache_[path] = state
-    name = f'plugins.{plugin}'
-    if name in state:
-        return state[name]
+    cname = f'plugins.{plugin}'
+    if cname in state:
+        return state[cname]
     logging.debug(f'Loading config from {path}')
     config = load_config(path)
     logging.debug(f'Merging config with options\n{kwargs}')
@@ -83,7 +83,11 @@ def _import_(plugin, config, **kwargs):
     assert plugin in plugins, f'Failed to find plugin "{plugin}" in config\n{config}'
     value = None
     for name in plugins:
-        value = create_plugin(name, config, state)
+        cname = f'plugins.{name}'
+        if cname in state:
+            value = state[cname]
+        else:
+            value = create_plugin(name, config, state)
         if name == plugin:
             break
     return value

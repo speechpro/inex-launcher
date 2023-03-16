@@ -1,6 +1,7 @@
 plugins:
   - params
   - model
+  - data
 
 params:
   module: inex.helpers/assign
@@ -14,4 +15,10 @@ model:
   module: inex.helpers/assign
   options:
     value:
-      model_path: ${model_path}
+      model_path: ${globals.model_path}
+
+data:
+  module: inex.helpers/assign
+  options:
+    value:
+      data_path: ${globals.data_root}/${globals.data_set}/wav.scp

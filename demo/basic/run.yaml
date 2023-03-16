@@ -1,5 +1,10 @@
 #!/bin/env inex
 
+globals:
+  model_path: work/models/ResNet-18.pt
+  data_root: work/dump/kaldi
+  data_set: dev
+
 plugins:
   - tensor
   - sum
@@ -10,6 +15,7 @@ plugins:
   - array
   - model
   - params
+  - data
 
 tensor:
   module: numpy/array
@@ -66,13 +72,21 @@ model:
   options:
     plugin: model
     config: model.yaml
-    model_path: work/models/ResNet-18.pt
+    globals: ${globals}
 
 params:
   module: inex.helpers/_import_
   options:
     plugin: params
     config: model.yaml
+    globals: ${globals}
+
+data:
+  module: inex.helpers/_import_
+  options:
+    plugin: data
+    config: model.yaml
+    globals: ${globals}
 
 execute:
   method: inex.helpers/show
@@ -87,6 +101,7 @@ execute:
     array: plugins.array
     model: plugins.model
     params: plugins.params
+    data: plugins.data
     list: [tensor.shape, tensor.dtype, plugins.sum]
     dict:
       shape: tensor.shape
