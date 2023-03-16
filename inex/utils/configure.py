@@ -75,8 +75,12 @@ def resolve_option(option, state):
 def create_plugin(name, config, state):
     assert name in config, f'Failed find module {name} in config\n{config}'
     params = config[name]
-    assert 'module' in params, f'Failed find module for plugin {name} in config\n{config}'
-    modname = params['module']
+    if name == 'execute':
+        assert 'method' in params, f'Failed to find "method" in execute section\n{params}'
+        modname = params['method']
+    else:
+        assert 'module' in params, f'Failed find "module" for plugin {name} in section\n{params}'
+        modname = params['module']
     parts = modname.split('^')
     if len(parts) == 1:
         index = None
@@ -153,3 +157,4 @@ def create_plugin(name, config, state):
             else:
                 assert False, f'Plugin {type(plugin)} does not have attribute {attr} for plugin {name} in config\n{config}'
     state[f'plugins.{name}'] = plugin
+    return plugin

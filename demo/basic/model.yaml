@@ -1,0 +1,17 @@
+plugins:
+  - params
+  - model
+
+params:
+  module: inex.helpers/assign
+  options:
+    value:
+      model_name: ResNet-18
+      inpot_dim: [28, 28]
+      num_classes: 10
+
+model:
+  module: inex.helpers/assign
+  options:
+    value:
+      model_path: ${model_path}

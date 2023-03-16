@@ -8,6 +8,8 @@ plugins:
   - choice1
   - choice2
   - array
+  - model
+  - params
 
 tensor:
   module: numpy/array
@@ -59,6 +61,19 @@ array:
     modname: numpy
     attname: array
 
+model:
+  module: inex.helpers/_import_
+  options:
+    plugin: model
+    config: model.yaml
+    model_path: work/models/ResNet-18.pt
+
+params:
+  module: inex.helpers/_import_
+  options:
+    plugin: params
+    config: model.yaml
+
 execute:
   method: inex.helpers/show
   imports:
@@ -70,6 +85,8 @@ execute:
     color2: plugins.choice2
     color3: plugins.colors^mabel
     array: plugins.array
+    model: plugins.model
+    params: plugins.params
     list: [tensor.shape, tensor.dtype, plugins.sum]
     dict:
       shape: tensor.shape
