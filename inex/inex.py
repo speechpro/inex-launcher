@@ -9,7 +9,7 @@ from inex.version import __version__
 from inex.engine import execute
 
 
-def start(log_level, log_path, sys_paths, merge, update, config_path):
+def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after=None):
     begin_time = datetime.now()
 
     configure_logging(log_level=log_level, log_path=log_path)
@@ -43,7 +43,7 @@ def start(log_level, log_path, sys_paths, merge, update, config_path):
     state['config_path'] = config_path
 
     logging.debug('Starting InEx execution')
-    execute(config=config, state=state)
+    execute(config=config, state=state, stop_after=stop_after)
 
     end_time = datetime.now()
     duration = timedelta(seconds=round((end_time - begin_time).total_seconds()))
@@ -60,6 +60,7 @@ def main():
     parser.add_argument('--sys-paths', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
     parser.add_argument('--merge', '-m', type=str, action='append', help='path to the configuration file to be merged with the main config')
     parser.add_argument('--update', '-u', type=str, action='append', help='update or set value for some parameter (use "dot" notation: "key1.key2=value")')
+    parser.add_argument('--stop-after', '-a', type=str, help='stop execution after the specified plugin is initialized')
     parser.add_argument('config_path', type=str, help='path to the configuration file (in YAML or JSON) or string with configuration in YAML')
     args = parser.parse_args()
     start(
@@ -69,6 +70,7 @@ def main():
         merge=args.merge,
         update=args.update,
         config_path=args.config_path,
+        stop_after=args.stop_after,
     )
 
 
