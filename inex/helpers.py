@@ -61,16 +61,29 @@ _cache_ = dict()
 def _import_(plugin, config, **kwargs):
     path = os.path.abspath(config)
     assert os.path.isfile(path), f'File {path} does not exist'
+    plugin = plugin.strip()
+    assert len(plugin) > 0, 'Empty plugin or attribute name'
+    parts = plugin.split('.')
+    if len(parts) == 1:
+        normal_name = plugin
+        cache_name = 'plugins.' + plugin
+    else:
+        assert len(parts) == 2, f'Wrong plugin or attribute name: "{plugin}"'
+        if parts[0] == 'plugins':
+            normal_name = parts[1]
+            cache_name = plugin
+        else:
+            normal_name = parts[0]
+            cache_name = plugin
     if path in _cache_:
-        logging.debug('Getting state from cache')
+        logging.debug('Getting state dictionary from cache')
         state = _cache_[path]
     else:
-        logging.debug('Creating new cache entry for state')
+        logging.debug('Creating new cache entry for state dictionary')
         state = dict()
         _cache_[path] = state
-    cname = f'plugins.{plugin}'
-    if cname in state:
-        return state[cname]
+    if cache_name in state:
+        return state[cache_name]
     logging.debug(f'Loading config from {path}')
     config = load_config(path)
     logging.debug(f'Merging config with options\n{kwargs}')
@@ -80,15 +93,17 @@ def _import_(plugin, config, **kwargs):
     assert 'plugins' in config, f'Failed to find "plugins" list in config\n{config}'
     plugins = config['plugins']
     assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
-    assert plugin in plugins, f'Failed to find plugin "{plugin}" in config\n{config}'
+    assert normal_name in plugins, f'Failed to find plugin "{normal_name}" in the list of plugins in config\n{config}'
     value = None
     for name in plugins:
         cname = f'plugins.{name}'
         if cname in state:
             value = state[cname]
         else:
-            value = create_plugin(name, config, state)
-        if name == plugin:
+            create_plugin(name, config, state)
+        if name == normal_name:
+            assert cache_name in state, f'Failed to find created plugin {name} in the state dictionary'
+            value = state[cache_name]
             break
     return value
 
