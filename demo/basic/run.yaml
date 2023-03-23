@@ -80,6 +80,7 @@ params:
   options:
     plugin: params
     config: model.yaml
+    depends: []
     globals: ${globals}
 
 data:

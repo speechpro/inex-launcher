@@ -58,7 +58,7 @@ def posit_args(modname, attname, arguments):
 _cache_ = dict()
 
 
-def _import_(plugin, config, ignore=None, **kwargs):
+def _import_(plugin, config, depends=None, ignore=None, **kwargs):
     path = os.path.abspath(config)
     assert os.path.isfile(path), f'File {path} does not exist'
     plugin = plugin.strip()
@@ -94,10 +94,15 @@ def _import_(plugin, config, ignore=None, **kwargs):
     plugins = config['plugins']
     assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
     assert normal_name in plugins, f'Failed to find plugin "{normal_name}" in the list of plugins in config\n{config}'
-    ignore = dict() if ignore is None else set(ignore)
+    if depends is not None:
+        depends = set(depends) | {plugin}
+    if ignore is not None:
+        ignore = set(ignore)
     value = None
     for name in plugins:
-        if name in ignore:
+        if (depends is not None) and (name not in depends):
+            continue
+        elif (ignore is not None) and (name in ignore):
             continue
         cname = f'plugins.{name}'
         if cname in state:
