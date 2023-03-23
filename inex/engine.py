@@ -13,6 +13,8 @@ def execute(config, state, stop_after=None):
                 logging.info(f'Execution stopped because specified plugin "{plugin}" was initialized')
                 return
     logging.debug('Looking for execution options')
-    assert 'execute' in config, f'Failed to find "execute" section in config\n{config}'
-    logging.debug('Loading execution options')
-    create_plugin('execute', config, state)
+    if 'execute' in config:
+        logging.debug('Loading execution options')
+        create_plugin('execute', config, state)
+    else:
+        logging.debug(f'Execution section does not exist in config\n{config}')

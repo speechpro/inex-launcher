@@ -2,6 +2,7 @@ import re
 import sys
 import logging
 import argparse
+from pathlib import Path
 from omegaconf import OmegaConf
 from datetime import datetime, timedelta
 from inex.utils.configure import configure_logging, load_config
@@ -9,7 +10,7 @@ from inex.version import __version__
 from inex.engine import execute
 
 
-def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after=None):
+def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after=None, final_path=None):
     begin_time = datetime.now()
 
     configure_logging(log_level=log_level, log_path=log_path)
@@ -37,6 +38,16 @@ def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
     logging.debug(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
 
+    if final_path is not None:
+        logging.debug(f'Writing final config to {final_path}')
+        final_path = Path(final_path)
+        parent = final_path.parent
+        if not parent.exists():
+            logging.debug(f'Creating directory {parent}')
+            parent.mkdir(parents=True, exist_ok=True)
+        with final_path.open('wt', encoding='utf-8') as stream:
+            print(OmegaConf.to_yaml(config), file=stream)
+
     state = dict()
     state['command_line'] = ' '.join(sys.argv)
     logging.debug(state['command_line'])
@@ -61,6 +72,7 @@ def main():
     parser.add_argument('--merge', '-m', type=str, action='append', help='path to the configuration file to be merged with the main config')
     parser.add_argument('--update', '-u', type=str, action='append', help='update or set value for some parameter (use "dot" notation: "key1.key2=value")')
     parser.add_argument('--stop-after', '-a', type=str, help='stop execution after the specified plugin is initialized')
+    parser.add_argument('--final-path', '-f', type=str, help='write final config to the specified file')
     parser.add_argument('config_path', type=str, help='path to the configuration file (in YAML or JSON) or string with configuration in YAML')
     args = parser.parse_args()
     start(
@@ -71,6 +83,7 @@ def main():
         update=args.update,
         config_path=args.config_path,
         stop_after=args.stop_after,
+        final_path=args.final_path,
     )
 
 
