@@ -72,6 +72,7 @@ model:
   options:
     plugin: model
     config: model.yaml
+    ignore: [params, data]
     globals: ${globals}
 
 params:
@@ -86,6 +87,7 @@ data:
   options:
     plugin: data
     config: model.yaml
+    ignore: [params, model]
     globals: ${globals}
 
 execute:
