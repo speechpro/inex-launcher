@@ -1,5 +1,6 @@
 import os
 import logging
+from pathlib import Path
 from omegaconf import OmegaConf
 from inex.utils.configure import load_config, create_plugin
 
@@ -26,6 +27,12 @@ def false():
 
 def assign(value):
     return value
+
+
+def read_text(path):
+    path = Path(path)
+    assert path.is_file(), f'File {path} does not exist'
+    return path.read_text()
 
 
 def evaluate(
