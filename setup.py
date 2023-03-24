@@ -45,6 +45,7 @@ setup(
     },
     install_requires=[
         'omegaconf',
+        'networkx',
         'pytest',
         'tox',
     ],

@@ -3,6 +3,7 @@ import re
 import sys
 import logging
 import logging.config
+import networkx as nx
 from omegaconf import OmegaConf
 
 
@@ -32,8 +33,10 @@ def configure_logging(log_level, log_path=None):
     }
     logging.config.dictConfig(CONFIG)
 
+
 def get_inex_logger():
     return logging.getLogger('inex')
+
 
 def load_config(conf_path):
     assert conf_path is not None, 'Failed to load config: config path is None'
@@ -48,6 +51,65 @@ def load_config(conf_path):
         else:
             config = OmegaConf.create(conf_path)
     return config
+
+
+def add_depends(graph, plugin, module, plugins):
+    if isinstance(module, str):
+        module = module.split('^')[0]
+        parts = module.split('.')
+        if len(parts) == 2:
+            if parts[0] == 'plugins':
+                if parts[1] in plugins:
+                    graph.add_edge(plugin, parts[1])
+            else:
+                if parts[0] in plugins:
+                    graph.add_edge(plugin, parts[0])
+    elif isinstance(module, list):
+        for item in module:
+            add_depends(graph=graph, plugin=plugin, module=item, plugins=plugins)
+    elif isinstance(module, dict):
+        for item in module.values():
+            add_depends(graph=graph, plugin=plugin, module=item, plugins=plugins)
+
+
+def bind_plugins(config):
+    if 'plugins' in config:
+        plugins = set(config['plugins'])
+        if 'execute' in config:
+            plugins.add('execute')
+    else:
+        plugins = set()
+        for key, opts in config.items():
+            if isinstance(opts, dict) and (('module' in opts) or ('method' in opts)):
+                plugins.add(key)
+    graph = nx.DiGraph()
+    for plugin in plugins:
+        graph.add_node(plugin)
+    for plugin in plugins:
+        opts = config[plugin]
+        module = opts['module'] if 'module' in opts else opts['method']
+        if module.startswith('plugins.'):
+            module = module.split('/')[0]
+            module = module.split('^')[0]
+            parts = module.split('.')
+            assert len(parts) == 2, f'Wrong plugin reference format {module} (must be in the form plugins.<name>)'
+            graph.add_edge(plugin, parts[1])
+        if 'imports' in opts:
+            imports = opts['imports']
+            for module in imports.values():
+                add_depends(graph=graph, plugin=plugin, module=module, plugins=plugins)
+        if 'depends' in opts:
+            deps = opts['depends']
+            assert isinstance(deps, list), f'Wrong plugin dependencies type {type(deps)} (must be a list)'
+            for item in deps:
+                graph.add_edge(plugin, item)
+    for plugin in plugins:
+        nodes = nx.descendants(graph, plugin)
+        if len(nodes) > 0:
+            opts = config[plugin]
+            deps = set(opts['depends']) if 'depends' in opts else set()
+            deps.update(nodes)
+            opts['depends'] = list(deps)
 
 
 def optional_int(value):

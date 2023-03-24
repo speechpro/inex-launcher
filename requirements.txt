@@ -1,3 +1,4 @@
 omegaconf
+networkx
 pytest
 tox

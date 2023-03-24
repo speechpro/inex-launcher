@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 from omegaconf import OmegaConf
 from datetime import datetime, timedelta
-from inex.utils.configure import configure_logging, load_config
+from inex.utils.configure import configure_logging, load_config, bind_plugins
 from inex.version import __version__
 from inex.engine import execute
 
@@ -25,6 +25,7 @@ def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after
     logging.debug('Reading configuration')
     config = load_config(config_path)
     if merge is not None:
+        logging.debug(f'Merging configs {merge}')
         configs = [config]
         for path in merge:
             configs.append(load_config(path))
@@ -33,10 +34,14 @@ def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after
     if update is not None:
         dot_list += update
     if len(dot_list) > 0:
+        logging.debug(f'Applying updates {dot_list}')
         options = OmegaConf.from_dotlist(dot_list)
         config = OmegaConf.merge(config, options)
+    logging.debug(f'Resolving config\n{config}')
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
-    logging.debug(f'Config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
+    logging.debug(f'Building plugin dependencies in config\n{config}')
+    bind_plugins(config)
+    logging.debug(f'Final config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
 
     if final_path is not None:
         logging.debug(f'Writing final config to {final_path}')

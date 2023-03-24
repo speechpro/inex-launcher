@@ -2,7 +2,7 @@ import os
 import logging
 from pathlib import Path
 from omegaconf import OmegaConf
-from inex.utils.configure import load_config, create_plugin
+from inex.utils.configure import load_config, create_plugin, bind_plugins
 
 
 def none():
@@ -97,6 +97,9 @@ def _import_(plugin, config, depends=None, ignore=None, **kwargs):
     config = OmegaConf.merge(config, kwargs)
     logging.debug(f'Resolving config\n{config}')
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
+    logging.debug(f'Building plugin dependencies in config\n{config}')
+    bind_plugins(config)
+    logging.debug(f'Final config:\n{config}')
     assert 'plugins' in config, f'Failed to find "plugins" list in config\n{config}'
     plugins = config['plugins']
     assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
