@@ -104,6 +104,11 @@ def _import_(plugin, config, depends=None, ignore=None, **kwargs):
     plugins = config['plugins']
     assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
     assert normal_name in plugins, f'Failed to find plugin "{normal_name}" in the list of plugins in config\n{config}'
+    assert normal_name in config, f'Failed to find plugin "{normal_name}" in config\n{config}'
+    options = config[normal_name]
+    if 'depends' in options:
+        opt_deps = set(options['depends'])
+        depends = opt_deps if depends is None else set(depends) | opt_deps
     if depends is not None:
         depends = set(depends) | {plugin}
     if ignore is not None:
