@@ -12,7 +12,7 @@ def configure_logging(log_level, log_path=None):
             "inex_out": {
                 "class": "logging.StreamHandler",
                 "formatter": "inex_basic",
-                "stream": "ext://sys.stdout",
+                "stream": "ext://sys.stderr",
             }
     }
     if log_path is not None:
