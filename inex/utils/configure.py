@@ -161,7 +161,9 @@ def create_plugin(name, config, state):
     if 'imports' in params:
         imports = params['imports']
         for key, value in imports.items():
-            if isinstance(value, str):
+            if key == '__kwargs__':
+                options.update(resolve_option(value, state))
+            elif isinstance(value, str):
                 parts = value.split('^')
                 if len(parts) == 1:
                     idx = None
