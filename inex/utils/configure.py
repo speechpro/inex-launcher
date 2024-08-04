@@ -179,7 +179,11 @@ def create_plugin(name, config, state):
                 options[key] = value
             else:
                 options[key] = resolve_option(value, state)
-    if ('__mute__' in config) and (name in config['__mute__']):
+    if (
+            ('__mute__' in config)
+            and ((name in config['__mute__']) or ('__all__' in config['__mute__']))
+            and (('__unmute__' not in config) or (name not in config['__unmute__']))
+    ):
         logging.debug(f'Creating plugin {name}')
     else:
         logging.debug(f'Creating plugin {name} from config\n{options}')
