@@ -13,7 +13,7 @@ def get_version():
 
 def get_version_sha():
     try:
-        sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
+        sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         sha = sha[:5]
     except Exception:
         sha = 'failed-to-get-sha'
@@ -21,7 +21,7 @@ def get_version_sha():
 
 
 path = os.path.join('inex', 'version.py')
-with open(path, "wt") as stream:
+with open(path, 'wt') as stream:
     print(f"__version__ = '{get_version_sha()}'", file=stream)
 
 
@@ -39,15 +39,19 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='MIT',
+    url='https://github.com/speechpro/inex',
+    project_urls={
+        'Bug Tracker': 'https://github.com/speechpro/inex/issues',
+    },
     classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Operating System :: POSIX :: Linux",
-        "Operating System :: MacOS",
-        "Operating System :: Microsoft :: Windows",
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: MacOS',
+        'Operating System :: Microsoft :: Windows',
     ],
     install_requires=[
         'omegaconf',

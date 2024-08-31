@@ -74,11 +74,24 @@ def main():
     parser.add_argument('--log-level', '-l', type=str, default='WARNING', help='set the root logger level')
     parser.add_argument('--log-path', '-g', type=str, help='path to the log-file')
     parser.add_argument('--sys-paths', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
-    parser.add_argument('--merge', '-m', type=str, action='append', help='path to the configuration file to be merged with the main config')
-    parser.add_argument('--update', '-u', type=str, action='append', help='update or set value for some parameter (use "dot" notation: "key1.key2=value")')
+    parser.add_argument(
+        '--merge', '-m',
+        type=str,
+        action='append',
+        help='path to the configuration file to be merged with the main config'
+    )
+    parser.add_argument(
+        '--update', '-u',
+        type=str,
+        action='append',
+        help='update or set value for some parameter (use "dot" notation: "key1.key2=value")')
     parser.add_argument('--stop-after', '-a', type=str, help='stop execution after the specified plugin is initialized')
     parser.add_argument('--final-path', '-f', type=str, help='write final config to the specified file')
-    parser.add_argument('config_path', type=str, help='path to the configuration file (in YAML or JSON) or string with configuration in YAML')
+    parser.add_argument(
+        'config_path',
+        type=str,
+        help='path to the configuration file (in YAML or JSON) or string with configuration in YAML'
+    )
     args = parser.parse_args()
     start(
         log_level=args.log_level,

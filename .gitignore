@@ -17,3 +17,4 @@ __pycache__/
 /demo/mnist/*/
 /demo/onnx/*.onnx
 /demo/*/*.log
+/commands.txt

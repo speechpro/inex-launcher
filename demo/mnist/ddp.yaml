@@ -1,7 +1,0 @@
-devices: ???
-num_nodes: ???
-
-strategy:
-  module: pytorch_lightning.strategies.ddp/DDPStrategy
-  options:
-    find_unused_parameters: false
