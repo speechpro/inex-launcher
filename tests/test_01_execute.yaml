@@ -1,0 +1,4 @@
+execute:
+    method: tests.test_01_execute/return_value
+    options:
+        value: 5

@@ -236,3 +236,4 @@ def create_plugin(name, config, state):
             else:
                 assert False, f'Plugin {type(plugin)} does not have attribute {attr} for plugin {name} in config\n{config}'
     state[f'plugins.{name}'] = plugin
+    return plugin

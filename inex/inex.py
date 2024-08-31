@@ -59,13 +59,15 @@ def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after
     state['config_path'] = config_path
 
     logging.debug('Starting InEx execution')
-    execute(config=config, state=state, stop_after=stop_after)
+    result = execute(config=config, state=state, stop_after=stop_after)
 
     end_time = datetime.now()
     duration = timedelta(seconds=round((end_time - begin_time).total_seconds()))
     print(f'\n# Started at {begin_time.date()} {begin_time.strftime("%H:%M:%S")}', file=sys.stderr)
     print(f'# Finished at {end_time.date()} {end_time.strftime("%H:%M:%S")}', file=sys.stderr)
     print(f'# Total time {duration} ({duration.total_seconds():.0f} sec)', file=sys.stderr)
+
+    return result
 
 
 def main():
