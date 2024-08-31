@@ -35,14 +35,20 @@ setup(
     python_requires='>=3.6',
     author='Yuri Khokhlov',
     author_email='khokhlov@speechpro.com',
-    description='inex: Initialize & Execute',
+    description='InEx is a lightweight highly configurable Python launcher based on microkernel architecture',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    license='Apache Software License',
-    url="https://nid-gitlab.ad.speechpro.com/asr2/inex",
-    project_urls={
-        "Bug Tracker": "https://nid-gitlab.ad.speechpro.com/asr2/inex/issues",
-    },
+    license='MIT',
+    classifiers=[
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS",
+        "Operating System :: Microsoft :: Windows",
+    ],
     install_requires=[
         'omegaconf',
         'networkx',
@@ -51,6 +57,7 @@ setup(
     ],
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
+    keywords='speechpro inex command-line configuration yaml',
     entry_points={
         'console_scripts': [
             'inex = inex.inex:main',
