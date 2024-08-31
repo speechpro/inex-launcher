@@ -32,7 +32,7 @@ with open('README.md', encoding='utf-8') as stream:
 setup(
     name='inex-launcher',
     version=get_version(),
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     author='Yuri Khokhlov',
     author_email='khokhlov@speechpro.com',
     description='InEx is a lightweight highly configurable Python launcher based on microkernel architecture',
