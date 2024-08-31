@@ -30,7 +30,7 @@ with open('README.md', encoding='utf-8') as stream:
 
 
 setup(
-    name='inex',
+    name='inex-launcher',
     version=get_version(),
     python_requires='>=3.6',
     author='Yuri Khokhlov',

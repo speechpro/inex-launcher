@@ -5,16 +5,11 @@ __pycache__/
 *.pyc
 /temp/
 /.eggs/
-/inex.egg-info/
+/*.egg-info/
 /venv/
 /build/
 /dist/
 /*.so
 /.tox/
-/path.sh
-/exp/
 /inex/version.py
-/demo/mnist/*/
-/demo/onnx/*.onnx
-/demo/*/*.log
 /commands.txt
