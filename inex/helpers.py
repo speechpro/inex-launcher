@@ -18,13 +18,8 @@ def read_text(path):
     return path.read_text()
 
 
-def evaluate(
-        expression,
-        a=None, b=None, c=None, d=None,
-        x=None, y=None, z=None, w=None,
-        i=None, j=None, k=None,
-        m=None, n=None,
-):
+def evaluate(expression: str, **kwargs):
+    expression = expression.format(**kwargs)
     return eval(expression)
 
 
