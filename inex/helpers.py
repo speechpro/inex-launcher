@@ -1,28 +1,11 @@
 import os
+import shutil
 import logging
+import subprocess
 from pathlib import Path
 from omegaconf import OmegaConf
+from typing import Optional, List, Union
 from inex.utils.configure import load_config, create_plugin, bind_plugins
-
-
-def none():
-    return None
-
-
-def zero():
-    return 0
-
-
-def one():
-    return 1
-
-
-def true():
-    return True
-
-
-def false():
-    return False
 
 
 def assign(value):
@@ -132,3 +115,85 @@ def _import_(plugin, config, depends=None, ignore=None, **kwargs):
 def show(**kwargs):
     for key, value in kwargs.items():
         print(f'\n{key}\n  type: {type(value)}\n  value: {value}')
+
+
+class OptionalFile:
+    def __init__(self, path=None, mode='rt', encoding='utf-8'):
+        self.path = path
+        self.mode = mode
+        self.encoding = encoding
+        self.file = None
+
+    def __enter__(self):
+        if self.path is None:
+            self.file = None
+        else:
+            path = Path(self.path).absolute()
+            if not path.parent.exists():
+                logging.debug(f'Creating directory {path.parent}')
+                path.parent.mkdir(parents=True, exist_ok=True)
+            self.file = path.open(mode=self.mode, encoding=self.encoding)
+        return self.file
+
+    def __exit__(self, type, value, traceback):
+        if self.file is not None:
+            self.file.close()
+            self.file = None
+
+
+def execute(
+    executable: str,
+    arguments: Optional[Union[str, List[str]]] = None,
+    title: Optional[str] = None,
+    log_file: Optional[str] = None,
+    done_mark: Optional[str] = None,
+    disable: bool = False,
+    silent: bool = False,
+) -> None:
+    if disable:
+        if title is not None:
+            print(f'{title} - [ Disabled ]')
+        return
+    if done_mark is not None:
+        done_mark = Path(done_mark)
+        if done_mark.exists():
+            if title is not None:
+                print(f'{title} - [ Done ]')
+            return
+    exec_path = shutil.which(executable)
+    if exec_path is not None:
+        executable = exec_path
+    if arguments is None:
+        arguments = list()
+    elif isinstance(arguments, str):
+        arguments = [arguments]
+    else:
+        arguments = [str(arg) for arg in arguments]
+    command = [executable] + arguments
+    if title is not None:
+        print(title)
+    logging.debug(f'Executing command:\n{command}')
+    process = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    with OptionalFile(log_file, mode='wt') as stream:
+        while True:
+            line = process.stdout.readline()
+            if len(line) == 0:
+                break
+            line = line.decode(encoding='utf-8').rstrip()
+            if not silent:
+                print(line)
+            if stream is not None:
+                print(line, file=stream)
+    process.communicate()
+    assert process.returncode == 0, f'Failed to execute command\n"{command}"'
+    if done_mark is not None:
+        done_mark = Path(done_mark).absolute()
+        if not done_mark.parent.exists():
+            logging.debug(f'Creating directory {done_mark.parent}')
+            done_mark.parent.mkdir(parents=True, exist_ok=True)
+        logging.debug(f'Creating file {done_mark}')
+        done_mark.touch(exist_ok=True)
