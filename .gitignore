@@ -10,6 +10,5 @@ __pycache__/
 /build/
 /dist/
 /*.so
-/.tox/
 /inex/version.py
 /commands.txt
