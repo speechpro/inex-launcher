@@ -1,7 +1,7 @@
 
 ![GitHub License](https://img.shields.io/github/license/speechpro/inex-launcher)
 ![PyPI - Version](https://img.shields.io/pypi/v/inex-launcher)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/inex-launcher.svg) |
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/inex-launcher.svg)
 
 <a href="https://github.com/speechpro/inex-launcher/stargazers"><img src="https://img.shields.io/github/stars/speechpro/inex-launcher" alt="Stars Badge"/></a>
 <a href="https://github.com/speechpro/inex-launcher/network/members"><img src="https://img.shields.io/github/forks/speechpro/inex-launcher" alt="Forks Badge"/></a>
@@ -14,4 +14,7 @@
 ## Lightweight highly configurable Python launcher based on microkernel architecture
 
 ### Installation
+
+```bash
 pip install -U inex-launcher
+```

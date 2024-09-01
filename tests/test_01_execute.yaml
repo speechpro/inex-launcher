@@ -1,4 +1,21 @@
+plugins:
+  - value1
+  - value2
+
+value1:
+  module: tests.test_01_execute/return_value
+  options:
+    value: 5
+
+value2:
+  module: tests.test_01_execute/Value
+  exports: [value]
+  options:
+    value: 7
+
 execute:
-    method: tests.test_01_execute/return_value
-    options:
-        value: 5
+  method: inex.helpers/assign
+  imports:
+    value:
+      - plugins.value1
+      - value2.value
