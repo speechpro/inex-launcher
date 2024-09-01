@@ -1,28 +1,25 @@
-import os
 import subprocess
+from pathlib import Path
 from setuptools import find_packages, setup
 
 
 def get_version():
-    path = os.path.abspath(os.path.join('inex', 'version.txt'))
-    assert os.path.isfile(path), f'File {path} does not exist'
-    with open(path) as stream:
-        version = stream.read().strip()
-    return version
+    path = Path(__file__).absolute().parent / 'inex' / 'version.txt'
+    assert path.is_file(), f'File {path} does not exist'
+    return path.read_text().strip()
 
 
 def get_version_sha():
     try:
         sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
         sha = sha[:5]
-    except Exception:
+    except subprocess.CalledProcessError:
         sha = 'failed-to-get-sha'
     return f'{get_version()}.{sha}'
 
 
-path = os.path.join('inex', 'version.py')
-with open(path, 'wt') as stream:
-    print(f"__version__ = '{get_version_sha()}'", file=stream)
+path = Path(__file__).absolute().parent / 'inex' / 'version.py'
+path.write_text(f"__version__ = '{get_version_sha()}'\n")
 
 
 with open('README.md', encoding='utf-8') as stream:
@@ -39,9 +36,9 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='MIT',
-    url='https://github.com/speechpro/inex',
+    url='https://github.com/speechpro/inex-launcher',
     project_urls={
-        'Bug Tracker': 'https://github.com/speechpro/inex/issues',
+        'Bug Tracker': 'https://github.com/speechpro/inex-launcher/issues',
     },
     classifiers=[
         'License :: OSI Approved :: MIT License',
@@ -57,12 +54,10 @@ setup(
     install_requires=[
         'omegaconf',
         'networkx',
-        'pytest',
-        'tox',
     ],
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
-    keywords='speechpro inex command-line configuration yaml',
+    keywords='speechpro inex launcher inex-launcher command-line configuration yaml',
     entry_points={
         'console_scripts': [
             'inex = inex.inex:main',

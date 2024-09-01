@@ -1,4 +1,2 @@
 omegaconf
 networkx
-pytest
-tox
