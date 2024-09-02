@@ -1,4 +1,5 @@
 import os
+import gzip
 import glob
 import shutil
 import logging
@@ -125,6 +126,8 @@ def compute_md5_hash(path):
 
 
 def check_md5_hash(pathnames):
+    if isinstance(pathnames, dict):
+        pathnames = [pathnames]
     for pathname in pathnames:
         path = Path(pathname['path'])
         assert path.is_file(), f'File {path} does not exist'
@@ -200,7 +203,10 @@ class OptionalFile:
             if not path.parent.exists():
                 logging.debug(f'Creating directory {path.parent}')
                 path.parent.mkdir(parents=True, exist_ok=True)
-            self.file = path.open(mode=self.mode, encoding=self.encoding)
+            if path.suffix == '.gz':
+                self.file = gzip.open(str(path), mode=self.mode, encoding=self.encoding)
+            else:
+                self.file = path.open(mode=self.mode, encoding=self.encoding)
         return self.file
 
     def __exit__(self, type, value, traceback):
