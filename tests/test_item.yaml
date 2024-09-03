@@ -1,0 +1,44 @@
+#!/bin/env inex
+
+plugins:
+  - value
+  - copy
+  - list
+  - dict
+
+value:
+  module: inex.helpers/evaluate
+  options:
+    initialize:
+      - import numpy as np
+    expression: 'np.array([1, 2, 3])'
+
+copy:
+  module: inex.helpers/assign
+  imports:
+    value: plugins.value^0
+
+list:
+  module: inex.helpers/assign
+  imports:
+    value: [plugins.value^1]
+
+dict:
+  module: inex.helpers/assign
+  imports:
+    value:
+      copy: plugins.value^1
+      list: [plugins.value^2]
+      dict:
+        value:
+          - plugins.value^0
+          - plugins.value^1
+          - plugins.value^2
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      copy: plugins.copy
+      list: plugins.list
+      dict: plugins.dict

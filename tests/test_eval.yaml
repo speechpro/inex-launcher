@@ -1,0 +1,28 @@
+#!/bin/env inex
+
+plugins:
+  - a+b
+  - mul
+
+a+b:
+  module: inex.helpers/evaluate
+  options:
+    expression: '{a} + {b}'
+    a: 2
+    b: 3
+
+mul:
+  module: inex.helpers/evaluate
+  imports:
+    x: plugins.a+b
+  options:
+    initialize:
+      - import numpy as np
+    expression: '{x} * np.array([1, 2, 3])'
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      a+b: plugins.a+b
+      mul: plugins.mul

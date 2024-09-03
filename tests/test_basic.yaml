@@ -1,14 +1,16 @@
+#!/bin/env inex
+
 plugins:
   - value1
   - value2
 
 value1:
-  module: tests.test_01_execute/return_value
+  module: tests.test_basic/return_value
   options:
     value: 5
 
 value2:
-  module: tests.test_01_execute/Value
+  module: tests.test_basic/Value
   exports: [value]
   options:
     value: 7
