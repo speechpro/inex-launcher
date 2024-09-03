@@ -15,7 +15,7 @@ class Value:
         return f'[Value: {self.value}]'
 
 
-class InexEngine(unittest.TestCase):
+class TestModule(unittest.TestCase):
     @staticmethod
     def test_config_file():
         config = Path(__file__).with_suffix('.yaml')
@@ -29,13 +29,13 @@ class InexEngine(unittest.TestCase):
         config = {
             'plugins': ['value1', 'value2'],
             'value1': {
-                'module': 'tests.test_01_execute/return_value',
+                'module': 'tests.test_basic/return_value',
                 'options': {
                     'value': 5,
                 },
             },
             'value2': {
-                'module': 'tests.test_01_execute/Value',
+                'module': 'tests.test_basic/Value',
                 'exports': ['value'],
                 'options': {
                     'value': 7,

@@ -21,7 +21,10 @@ def read_text(path):
     return path.read_text()
 
 
-def evaluate(expression: str, **kwargs):
+def evaluate(expression: str, initialize: List[str] = None, **kwargs):
+    if initialize is not None:
+        for sentence in initialize:
+            exec(sentence)
     expression = expression.format(**kwargs)
     return eval(expression)
 

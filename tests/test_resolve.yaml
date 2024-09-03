@@ -1,0 +1,39 @@
+#!/bin/env inex
+
+plugins:
+  - value
+  - copy
+  - list
+  - dict
+
+value:
+  module: inex.helpers/assign
+  options:
+    value: 5
+
+copy:
+  module: inex.helpers/assign
+  imports:
+    value: plugins.value
+
+list:
+  module: inex.helpers/assign
+  imports:
+    value: [plugins.value]
+
+dict:
+  module: inex.helpers/assign
+  imports:
+    value:
+      copy: plugins.value
+      list: [plugins.value]
+      dict:
+        value: plugins.value
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      copy: plugins.copy
+      list: plugins.list
+      dict: plugins.dict

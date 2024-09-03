@@ -121,16 +121,31 @@ def resolve_option(option, state):
         for i, value in enumerate(option):
             if isinstance(value, list) or isinstance(value, dict):
                 option[i] = resolve_option(value, state)
-            elif isinstance(value, str) and (value in state):
-                option[i] = state[value]
+            elif isinstance(value, str):
+                if value in state:
+                    option[i] = state[value]
+                else:
+                    parts = value.split('^')
+                    if (len(parts) == 2) and (parts[0] in state):
+                        option[i] = state[parts[0]][optional_int(parts[1])]
     elif isinstance(option, dict):
         for key, value in option.items():
             if isinstance(value, list) or isinstance(value, dict):
                 option[key] = resolve_option(value, state)
-            elif isinstance(value, str) and (value in state):
-                option[key] = state[value]
-    elif isinstance(option, str) and (option in state):
-        option = state[option]
+            elif isinstance(value, str):
+                if value in state:
+                    option[key] = state[value]
+                else:
+                    parts = value.split('^')
+                    if (len(parts) == 2) and (parts[0] in state):
+                        option[key] = state[parts[0]][optional_int(parts[1])]
+    elif isinstance(option, str):
+        if option in state:
+            option = state[option]
+        else:
+            parts = option.split('^')
+            if (len(parts) == 2) and (parts[0] in state):
+                option = state[parts[0]][optional_int(parts[1])]
     return option
 
 
