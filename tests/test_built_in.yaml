@@ -1,0 +1,29 @@
+#!/bin/env inex
+
+plugins:
+  - max
+  - eval
+  - tuple
+
+max:
+  module: /max
+  options:
+    __args__: [1, 2]
+
+eval:
+  module: /eval
+  options:
+    __args__: ['min(5 * 3, 2 * 10)']
+
+tuple:
+  module: /tuple
+  options:
+    __args__: [[1, 2, 3]]
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      max: plugins.max
+      eval: plugins.eval
+      tuple: plugins.tuple

@@ -36,16 +36,6 @@ def attribute(modname, attname):
     return getattr(module, attname)
 
 
-def posit_args(modname, attname, arguments):
-    if isinstance(modname, str):
-        logging.debug(f'Loading module {modname}')
-        module = __import__(modname, fromlist=[''])
-    else:
-        module = modname
-    assert hasattr(module, attname), f'Module {modname} does not have attribute {attname}'
-    return getattr(module, attname)(*arguments)
-
-
 _cache_ = dict()
 
 

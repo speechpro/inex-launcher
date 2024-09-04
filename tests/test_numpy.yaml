@@ -1,0 +1,15 @@
+#!/bin/env inex
+
+plugins:
+  - array0
+
+array0:
+  module: numpy/array
+  options:
+    __args__: [[1, 2, 3]]
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      - plugins.array0
