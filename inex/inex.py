@@ -3,15 +3,23 @@ import sys
 import logging
 import argparse
 from pathlib import Path
-from omegaconf import OmegaConf
 from datetime import datetime, timedelta
+from omegaconf import OmegaConf, Resolver
 from inex.utils.configure import configure_logging, load_config, bind_plugins
 from inex.version import __version__
 from inex.engine import execute
 
 
+def fetch(path_yaml):
+    path_yaml = Path(path_yaml)
+    assert path_yaml.is_file(), f'File {path_yaml} does not exist'
+    return OmegaConf.load(path_yaml)
+
+
 def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after=None, final_path=None):
     begin_time = datetime.now()
+
+    OmegaConf.register_new_resolver('__fetch__', fetch, replace=True)
 
     configure_logging(log_level=log_level, log_path=log_path)
 
