@@ -6,6 +6,7 @@ import logging
 import hashlib
 import subprocess
 from pathlib import Path
+from warnings import deprecated
 from omegaconf import OmegaConf
 from typing import Optional, List, Dict, Union
 from inex.utils.configure import load_config, create_plugin, bind_plugins
@@ -36,6 +37,7 @@ def attribute(modname, attname):
     return getattr(module, attname)
 
 
+@deprecated("Use __args__: [...] instead")
 def posit_args(modname, attname, arguments):
     if isinstance(modname, str):
         logging.debug(f'Loading module {modname}')
