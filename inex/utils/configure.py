@@ -96,6 +96,9 @@ def bind_plugins(config):
             graph.add_edge(plugin, parts[1])
         if 'imports' in opts:
             imports = opts['imports']
+            if isinstance(imports, list):
+                imports = {'__args__': imports}
+                opts['imports'] = imports
             for module in imports.values():
                 add_depends(graph=graph, plugin=plugin, module=module, plugins=plugins)
         if 'depends' in opts:
@@ -175,6 +178,8 @@ def create_plugin(name, config, state):
     args = list()
     if 'options' in params:
         kwargs = params['options']
+        if isinstance(kwargs, list):
+            kwargs = {'__args__': kwargs}
         if '__args__' in kwargs:
             args.extend(kwargs['__args__'])
             del kwargs['__args__']
@@ -185,6 +190,8 @@ def create_plugin(name, config, state):
         kwargs = dict()
     if 'imports' in params:
         imports = params['imports']
+        if isinstance(imports, list):
+            imports = {'__args__': imports}
         for key, value in imports.items():
             if key == '__args__':
                 args.extend(resolve_option(value, state))

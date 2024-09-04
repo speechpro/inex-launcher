@@ -14,9 +14,12 @@ kwargs:
 plugins:
   - object1
   - object2
+  - object3
+  - object4
 
 object1:
   module: tests.test_pos_args/Object
+  exports: [a, b, d, e]
   options:
     d: 5
     e: 6
@@ -31,9 +34,24 @@ object2:
     __kwargs__: ${kwargs}
     __args__: ${args}
 
+object3:
+  module: numpy/array
+  options: [[1, 2, 3]]
+
+object4:
+  module: numpy/array
+  imports:
+    -
+      - object1.a
+      - object1.b
+      - object1.d
+      - object1.e
+
 execute:
   method: inex.helpers/assign
   imports:
     value:
       - plugins.object1
       - plugins.object2
+      - plugins.object3
+      - plugins.object4

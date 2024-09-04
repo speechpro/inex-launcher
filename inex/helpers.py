@@ -6,7 +6,6 @@ import logging
 import hashlib
 import subprocess
 from pathlib import Path
-from warnings import deprecated
 from omegaconf import OmegaConf
 from typing import Optional, List, Dict, Union
 from inex.utils.configure import load_config, create_plugin, bind_plugins
@@ -35,17 +34,6 @@ def attribute(modname, attname):
     module = __import__(modname, fromlist=[''])
     assert hasattr(module, attname), f'Module {modname} does not have attribute {attname}'
     return getattr(module, attname)
-
-
-@deprecated("Use __args__: [...] instead")
-def posit_args(modname, attname, arguments):
-    if isinstance(modname, str):
-        logging.debug(f'Loading module {modname}')
-        module = __import__(modname, fromlist=[''])
-    else:
-        module = modname
-    assert hasattr(module, attname), f'Module {modname} does not have attribute {attname}'
-    return getattr(module, attname)(*arguments)
 
 
 _cache_ = dict()
