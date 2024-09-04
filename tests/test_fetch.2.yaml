@@ -1,0 +1,11 @@
+#!/bin/env inex
+
+params: ${__fetch__:tests/test_fetch.1.yaml}
+
+execute:
+  method: inex.helpers/assign
+  options:
+    value:
+      a: ${params.a}
+      b: ${params.b}
+      c: ${params.c}
