@@ -1,0 +1,29 @@
+#!/bin/env inex
+
+params:
+  a: 1
+  b: 2
+  c:
+    - 3
+    - 4
+
+plugins:
+  - object1
+  - object2
+
+object1:
+  module: tests.test_kwargs/Object
+  options:
+    __kwargs__: ${params}
+
+object2:
+  module: tests.test_kwargs/Object
+  imports:
+    __kwargs__: ${params}
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      - plugins.object1
+      - plugins.object2

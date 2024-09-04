@@ -1,0 +1,21 @@
+#!/bin/env inex
+
+plugins:
+  - value1
+  - value2
+  - value3
+
+value1:
+  module: inex.helpers/assign
+  options:
+    value: 7
+
+value2:
+  module: numpy/array
+  options:
+    __args__: [[1, 2, 3]]
+
+value3:
+  module: inex.helpers/assign
+  imports:
+    value: plugins.value2

@@ -1,0 +1,24 @@
+#!/bin/env inex
+
+plugins:
+  - value1
+  - value3
+  - value2
+
+value1:
+  module: inex.helpers/_import_
+  options:
+    config: tests/test_import.1.yaml
+    plugin: value1
+
+value3:
+  module: inex.helpers/_import_
+  options:
+    config: tests/test_import.1.yaml
+    plugin: value3
+
+value2:
+  module: inex.helpers/_import_
+  options:
+    config: tests/test_import.1.yaml
+    plugin: value2

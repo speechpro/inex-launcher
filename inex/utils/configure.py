@@ -172,12 +172,24 @@ def create_plugin(name, config, state):
         classname = parts[1]
     else:
         classname = None
-    options = params['options'] if 'options' in params else dict()
+    args = list()
+    if 'options' in params:
+        kwargs = params['options']
+        if '__args__' in kwargs:
+            args.extend(kwargs['__args__'])
+            del kwargs['__args__']
+        if '__kwargs__' in kwargs:
+            kwargs.update(kwargs['__kwargs__'])
+            del kwargs['__kwargs__']
+    else:
+        kwargs = dict()
     if 'imports' in params:
         imports = params['imports']
         for key, value in imports.items():
-            if key == '__kwargs__':
-                options.update(resolve_option(value, state))
+            if key == '__args__':
+                args.extend(resolve_option(value, state))
+            elif key == '__kwargs__':
+                kwargs.update(resolve_option(value, state))
             elif isinstance(value, str):
                 parts = value.split('^')
                 if len(parts) == 1:
@@ -194,9 +206,9 @@ def create_plugin(name, config, state):
                         f'Imported class {type(value)} does not have attribute ' \
                         f'__getitem__ for plugin {name} in config\n{config}'
                     value = value[optional_int(idx)]
-                options[key] = value
+                kwargs[key] = value
             else:
-                options[key] = resolve_option(value, state)
+                kwargs[key] = resolve_option(value, state)
     if (
             ('__mute__' in config)
             and ((name in config['__mute__']) or ('__all__' in config['__mute__']))
@@ -204,40 +216,44 @@ def create_plugin(name, config, state):
     ):
         logging.debug(f'Creating plugin {name}')
     else:
-        logging.debug(f'Creating plugin {name} from config\n{options}')
+        logging.debug(f'Creating plugin {name} from config\n{kwargs}')
     if modname.startswith('plugins.') and (modname in state):
         plugin = state[modname]
         if classname is None:
-            plugin = plugin(**options)
+            plugin = plugin(*args, **kwargs)
         else:
             assert hasattr(plugin, classname), \
                 f'Plugin {modname} does not have attribute {classname} for plugin {name} in config\n{config}'
             method = getattr(plugin, classname)
-            plugin = method(**options)
+            plugin = method(*args, **kwargs)
     else:
-        logging.debug(f'Loading module {modname}')
-        module = __import__(modname, fromlist=[''])
-        if classname is None:
-            logging.debug(f'Creating plugin {name} using class factory create() from module {modname}')
-            plugin = module.create(options)
+        if len(modname) == 0:
+            method = eval(classname)
+            plugin = method(*args, **kwargs)
         else:
-            logging.debug(f'Creating plugin {name} with class name {classname} from module {modname}')
-            parts = classname.split('.')
-            if len(parts) == 1:
-                assert hasattr(module, classname), \
-                    f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
-                classtype = getattr(module, classname)
-                plugin = classtype(**options)
+            logging.debug(f'Loading module {modname}')
+            module = __import__(modname, fromlist=[''])
+            if classname is None:
+                logging.debug(f'Creating plugin {name} using class factory create() from module {modname}')
+                plugin = module.create(*args, **kwargs)
             else:
-                classname = parts[0]
-                attribute = parts[1]
-                assert hasattr(module, classname), \
-                    f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
-                classtype = getattr(module, classname)
-                assert hasattr(classtype, attribute), \
-                    f'Class {classname} does not have attribute {attribute} for plugin {name} in config\n{config}'
-                method = getattr(classtype, attribute)
-                plugin = method(**options)
+                logging.debug(f'Creating plugin {name} with class name {classname} from module {modname}')
+                parts = classname.split('.')
+                if len(parts) == 1:
+                    assert hasattr(module, classname), \
+                        f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
+                    classtype = getattr(module, classname)
+                    plugin = classtype(*args, **kwargs)
+                else:
+                    classname = parts[0]
+                    attribute = parts[1]
+                    assert hasattr(module, classname), \
+                        f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
+                    classtype = getattr(module, classname)
+                    assert hasattr(classtype, attribute), \
+                        f'Class {classname} does not have attribute {attribute} for plugin {name} in config\n{config}'
+                    method = getattr(classtype, attribute)
+                    plugin = method(*args, **kwargs)
     if index is not None:
         assert hasattr(plugin, '__getitem__'), \
             f'Class {type(plugin)} does not have attribute __getitem__ for plugin {name} in config\n{config}'

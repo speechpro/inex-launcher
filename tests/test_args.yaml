@@ -1,0 +1,29 @@
+#!/bin/env inex
+
+params:
+  - 1
+  - 2
+  -
+    - 3
+    - 4
+
+plugins:
+  - object1
+  - object2
+
+object1:
+  module: tests.test_args/Object
+  options:
+    __args__: ${params}
+
+object2:
+  module: tests.test_args/Object
+  imports:
+    __args__: ${params}
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      - plugins.object1
+      - plugins.object2
