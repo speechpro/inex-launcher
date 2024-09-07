@@ -14,6 +14,7 @@ class TestModule(unittest.TestCase):
         assert values['a'] == 1
         assert values['b'] == 2
         assert values['c'] == [3, 4, 5]
+        assert values['d'] == [3, 4, 5]
 
 
 if __name__ == '__main__':
