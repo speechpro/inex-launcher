@@ -2,6 +2,8 @@
 
 params: ${__fetch__:tests/test_fetch.1.yaml}
 
+d: ${__fetch__:tests/test_fetch.1.yaml, c}
+
 execute:
   method: inex.helpers/assign
   options:
@@ -9,3 +11,4 @@ execute:
       a: ${params.a}
       b: ${params.b}
       c: ${params.c}
+      d: ${d}
