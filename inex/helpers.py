@@ -219,19 +219,25 @@ def execute(
     log_file: Optional[str] = None,
     done_mark: Optional[str] = None,
     disable: bool = False,
+    force: bool = False,
     silent: bool = False,
 ) -> None:
-    if disable:
+    if force:
         if title is not None:
-            print(f'{title} - [ Disabled ]')
-        return
-
-    if done_mark is not None:
-        done_mark = Path(done_mark)
-        if done_mark.exists():
+            print(f'{title} - [ Forced ]')
+    else:
+        if disable:
             if title is not None:
-                print(f'{title} - [ Done ]')
+                print(f'{title} - [ Disabled ]')
             return
+        if done_mark is not None:
+            done_mark = Path(done_mark)
+            if done_mark.exists():
+                if title is not None:
+                    print(f'{title} - [ Done ]')
+                return
+        if title is not None:
+            print(title)
 
     if must_exist is not None:
         check_existence(must_exist)
@@ -252,9 +258,6 @@ def execute(
     else:
         arguments = [str(arg) for arg in arguments]
     command = [executable] + arguments
-
-    if title is not None:
-        print(title)
 
     if log_file is not None:
         log_file = Path(log_file).absolute()
