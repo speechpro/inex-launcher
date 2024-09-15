@@ -212,7 +212,7 @@ class OptionalFile:
 def stage(
     config_path: str,
     merge_paths: Optional[Union[str, List[str]]] = None,
-    override: Optional[Union[str, List[str]]] = None,
+    override: Optional[Union[str, List[str], Dict[str, Any]]] = None,
     title: Optional[str] = None,
     must_exist: Optional[Union[str, List, Dict]] = None,
     check_md5: Optional[Union[str, List, Dict]] = None,
@@ -272,8 +272,10 @@ def stage(
         if isinstance(override, str):
             override = [override]
         logging.debug(f'Overriding options:\n{override}')
-        options = OmegaConf.from_dotlist(override)
-        config = OmegaConf.merge(config, options)
+        if isinstance(override, list):
+            config = OmegaConf.merge(config, OmegaConf.from_dotlist(override))
+        else:
+            config = OmegaConf.merge(config, override)
     logging.debug(f'Resolving config\n{config}')
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
     logging.debug(f'Building plugin dependencies in config\n{config}')
