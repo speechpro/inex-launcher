@@ -15,7 +15,7 @@ def fetch(path, value=None):
     assert path.is_file(), f'File {path} does not exist'
     config = OmegaConf.load(path)
     if value is not None:
-        config = config[value]
+        config = eval(f'config.{value}')
     return config
 
 

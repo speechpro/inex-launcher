@@ -106,7 +106,7 @@ def _import_(plugin, config, depends=None, ignore=None, **kwargs):
 
 def show(**kwargs):
     for key, value in kwargs.items():
-        print(f'\n{key}\n  type: {type(value)}\n  value: {value}')
+        print(f'\n{key}\n  type: {type(value)}\n  id: {id(value)}\n  value: {value}')
 
 
 def compute_md5_hash(path):
