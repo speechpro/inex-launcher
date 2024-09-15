@@ -1,10 +1,13 @@
-import os
 import re
 import sys
 import logging
 import logging.config
 import networkx as nx
-from omegaconf import OmegaConf
+from typing import Union
+from pathlib import Path
+
+import yaml.parser
+from omegaconf import OmegaConf, DictConfig, ListConfig
 
 
 def configure_logging(log_level, log_path=None):
@@ -38,19 +41,22 @@ def get_inex_logger():
     return logging.getLogger('inex')
 
 
-def load_config(conf_path):
+def load_config(conf_path: Union[str, Path]) -> Union[DictConfig, ListConfig]:
     assert conf_path is not None, 'Failed to load config: config path is None'
     if isinstance(conf_path, dict):
-        config = OmegaConf.create(conf_path)
-    elif conf_path == '-':
-        config = OmegaConf.create(sys.stdin.read())
-    else:
-        assert len(conf_path) > 0, 'Failed to load config: config path is empty string'
-        if os.path.isfile(conf_path):
-            config = OmegaConf.load(conf_path)
-        else:
+        return OmegaConf.create(conf_path)
+    if str(conf_path) == '-':
+        return OmegaConf.create(sys.stdin.read())
+    if isinstance(conf_path, str) and not Path(conf_path).is_file():
+        try:
             config = OmegaConf.create(conf_path)
-    return config
+            if config != {conf_path: None}:
+                return config
+        except yaml.parser.ParserError:
+            pass
+    conf_path = Path(conf_path)
+    assert conf_path.is_file(), f'File {conf_path} does not exist'
+    return OmegaConf.load(conf_path)
 
 
 def add_depends(graph, plugin, module, plugins):

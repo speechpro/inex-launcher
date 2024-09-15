@@ -7,7 +7,8 @@ import hashlib
 import subprocess
 from pathlib import Path
 from omegaconf import OmegaConf
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Dict, Union, Any
+from inex.engine import execute as exec_inex
 from inex.utils.configure import load_config, create_plugin, bind_plugins
 
 
@@ -206,6 +207,98 @@ class OptionalFile:
         if self.file is not None:
             self.file.close()
             self.file = None
+
+
+def stage(
+    config_path: str,
+    merge_paths: Optional[Union[str, List[str]]] = None,
+    override: Optional[Union[str, List[str]]] = None,
+    title: Optional[str] = None,
+    must_exist: Optional[Union[str, List, Dict]] = None,
+    check_md5: Optional[Union[str, List, Dict]] = None,
+    cleanup: Optional[Union[str, List, Dict]] = None,
+    make_dirs: Optional[Union[str, List]] = None,
+    final_path: Optional[str] = None,
+    done_mark: Optional[str] = None,
+    disable: bool = False,
+    force: bool = False,
+) -> Any:
+    if force:
+        if title is not None:
+            print(f'{title} - [ Forced ]')
+    else:
+        if disable:
+            if title is not None:
+                print(f'{title} - [ Disabled ]')
+            return
+        if done_mark is not None:
+            done_mark = Path(done_mark)
+            if done_mark.exists():
+                if title is not None:
+                    print(f'{title} - [ Done ]')
+                return
+        if title is not None:
+            print(title)
+
+    config_path = Path(config_path).absolute()
+    assert config_path.is_file(), f'File {config_path} does not exist'
+
+    if must_exist is not None:
+        check_existence(must_exist)
+    if check_md5 is not None:
+        check_md5_hash(check_md5)
+    if cleanup is not None:
+        remove_paths(cleanup)
+    if make_dirs is not None:
+        make_directories(make_dirs)
+
+    if done_mark is not None:
+        done_mark = Path(done_mark).absolute()
+        if not done_mark.parent.exists():
+            logging.debug(f'Creating directory {done_mark.parent}')
+            done_mark.parent.mkdir(parents=True, exist_ok=True)
+
+    logging.debug('Reading configuration')
+    config = load_config(config_path)
+    if merge_paths is not None:
+        if isinstance(merge_paths, str):
+            merge_paths = [merge_paths]
+        logging.debug(f'Merging configs {merge_paths}')
+        configs = [config]
+        for path in merge_paths:
+            configs.append(load_config(path))
+        config = OmegaConf.merge(*configs)
+    if override is not None:
+        if isinstance(override, str):
+            override = [override]
+        logging.debug(f'Overriding options:\n{override}')
+        options = OmegaConf.from_dotlist(override)
+        config = OmegaConf.merge(config, options)
+    logging.debug(f'Resolving config\n{config}')
+    config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
+    logging.debug(f'Building plugin dependencies in config\n{config}')
+    bind_plugins(config)
+    logging.debug(f'Final config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
+
+    if final_path is not None:
+        final_path = Path(final_path)
+        parent = final_path.parent
+        if not parent.exists():
+            logging.debug(f'Creating directory {parent}')
+            parent.mkdir(parents=True, exist_ok=True)
+        logging.debug(f'Writing final config to {final_path}')
+        with final_path.open('wt', encoding='utf-8') as stream:
+            print(OmegaConf.to_yaml(config), file=stream)
+
+    logging.debug(f'Executing {config_path}')
+    state = {'config_path': config_path}
+    result = exec_inex(config=config, state=state)
+
+    if done_mark is not None:
+        logging.debug(f'Creating file {done_mark}')
+        done_mark.touch(exist_ok=True)
+
+    return result
 
 
 def execute(
