@@ -303,6 +303,14 @@ def stage(
     return result
 
 
+def write_script(path: str, text: str):
+    path = Path(path)
+    if not path.parent.exists():
+        logging.debug(f'Creating directory {path.parent}')
+        path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding='utf-8')
+
+
 def execute(
     executable: str,
     arguments: Optional[Union[str, List[str]]] = None,
@@ -311,6 +319,8 @@ def execute(
     check_md5: Optional[Union[str, List, Dict]] = None,
     cleanup: Optional[Union[str, List, Dict]] = None,
     make_dirs: Optional[Union[str, List]] = None,
+    script_path: Optional[str] = None,
+    script_text: Optional[str] = None,
     log_file: Optional[str] = None,
     done_mark: Optional[str] = None,
     disable: bool = False,
@@ -366,6 +376,10 @@ def execute(
             logging.debug(f'Creating directory {done_mark.parent}')
             done_mark.parent.mkdir(parents=True, exist_ok=True)
 
+    if script_path is not None:
+        logging.debug(f'Writing script {script_path}')
+        write_script(script_path, script_text)
+
     logging.debug(f'Executing command:\n{command}')
     process = subprocess.Popen(
         command,
@@ -398,6 +412,8 @@ def system(
     check_md5: Optional[Union[str, List, Dict]] = None,
     cleanup: Optional[Union[str, List, Dict]] = None,
     make_dirs: Optional[Union[str, List]] = None,
+    script_path: Optional[str] = None,
+    script_text: Optional[str] = None,
     done_mark: Optional[str] = None,
     disable: bool = False,
     force: bool = False,
@@ -433,6 +449,10 @@ def system(
         if not done_mark.parent.exists():
             logging.debug(f'Creating directory {done_mark.parent}')
             done_mark.parent.mkdir(parents=True, exist_ok=True)
+
+    if script_path is not None:
+        logging.debug(f'Writing script {script_path}')
+        write_script(script_path, script_text)
 
     logging.debug(f'Executing command:\n{command}')
     code = subprocess.call(command, shell=True)
