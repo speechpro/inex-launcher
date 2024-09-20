@@ -389,3 +389,55 @@ def execute(
     if done_mark is not None:
         logging.debug(f'Creating file {done_mark}')
         done_mark.touch(exist_ok=True)
+
+
+def system(
+    command: str,
+    title: Optional[str] = None,
+    must_exist: Optional[Union[str, List, Dict]] = None,
+    check_md5: Optional[Union[str, List, Dict]] = None,
+    cleanup: Optional[Union[str, List, Dict]] = None,
+    make_dirs: Optional[Union[str, List]] = None,
+    done_mark: Optional[str] = None,
+    disable: bool = False,
+    force: bool = False,
+) -> None:
+    if force:
+        if title is not None:
+            print(f'{title} - [ Forced ]')
+    else:
+        if disable:
+            if title is not None:
+                print(f'{title} - [ Disabled ]')
+            return
+        if done_mark is not None:
+            done_mark = Path(done_mark)
+            if done_mark.exists():
+                if title is not None:
+                    print(f'{title} - [ Done ]')
+                return
+        if title is not None:
+            print(title)
+
+    if must_exist is not None:
+        check_existence(must_exist)
+    if check_md5 is not None:
+        check_md5_hash(check_md5)
+    if cleanup is not None:
+        remove_paths(cleanup)
+    if make_dirs is not None:
+        make_directories(make_dirs)
+
+    if done_mark is not None:
+        done_mark = Path(done_mark).absolute()
+        if not done_mark.parent.exists():
+            logging.debug(f'Creating directory {done_mark.parent}')
+            done_mark.parent.mkdir(parents=True, exist_ok=True)
+
+    logging.debug(f'Executing command:\n{command}')
+    code = subprocess.call(command, shell=True)
+    assert code == 0, f'Failed to execute command\n"{command}"'
+
+    if done_mark is not None:
+        logging.debug(f'Creating file {done_mark}')
+        done_mark.touch(exist_ok=True)
