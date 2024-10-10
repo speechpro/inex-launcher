@@ -398,7 +398,7 @@ def execute(
             if stream is not None:
                 print(line, file=stream)
     process.communicate()
-    assert process.returncode == 0, f'Failed to execute command\n"{command}"'
+    assert process.returncode == 0, f'Failed to execute command\n"{command}"\nError code: {process.returncode}'
 
     if done_mark is not None:
         logging.debug(f'Creating file {done_mark}')
@@ -456,7 +456,7 @@ def system(
 
     logging.debug(f'Executing command:\n{command}')
     code = subprocess.call(command, shell=True)
-    assert code == 0, f'Failed to execute command\n"{command}"'
+    assert code == 0, f'Failed to execute command\n"{command}"\nError code: {code}'
 
     if done_mark is not None:
         logging.debug(f'Creating file {done_mark}')

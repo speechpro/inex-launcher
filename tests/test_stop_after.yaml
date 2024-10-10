@@ -1,0 +1,21 @@
+#!/bin/env inex
+
+plugins:
+  - plugin1
+  - plugin2
+  - plugin3
+
+plugin1:
+  module: inex.helpers/assign
+  options:
+    value: 1
+
+plugin2:
+  module: inex.helpers/assign
+  options:
+    value: 2
+
+plugin3:
+  module: inex.helpers/assign
+  options:
+    value: 3

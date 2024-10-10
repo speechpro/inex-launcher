@@ -8,11 +8,11 @@ def execute(config, state, stop_after=None):
     if 'plugins' in config:
         plugins = config['plugins']
         assert isinstance(plugins, list), f'Wrong type of "plugins" {type(plugins)} (must be list)'
-        for plugin in plugins:
-            plugin = create_plugin(plugin, config, state)
-            if (stop_after is not None) and (plugin == stop_after):
-                logging.info(f'Execution stopped because specified plugin "{plugin}" was initialized')
-                return
+        for plug_name in plugins:
+            plugin = create_plugin(plug_name, config, state)
+            if (stop_after is not None) and (plug_name == stop_after):
+                logging.info(f'Execution stopped: condition "{plug_name} == {stop_after}" reached.')
+                return plugin
     logging.debug('Looking for execution options')
     if 'execute' in config:
         logging.debug('Loading execution options')
