@@ -16,5 +16,6 @@ def call_engine(config, stop_after=None):
             sys_paths=None,
             merge=None,
             update=None,
-            config_path=str(config)
+            config_path=str(config),
+            stop_after=stop_after,
         )
