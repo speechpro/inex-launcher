@@ -209,6 +209,45 @@ class OptionalFile:
             self.file = None
 
 
+def compose(
+    config: Dict[str, Any],
+    merge_paths: Optional[Union[str, List[str]]] = None,
+    merge_dicts: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None,
+    override: Optional[Union[str, List[str], Dict[str, Any]]] = None,
+    result_path: Optional[str] = None,
+) -> Dict[str, Any]:
+    if merge_paths is not None:
+        if isinstance(merge_paths, str):
+            merge_paths = [merge_paths]
+        configs = [config]
+        for path in merge_paths:
+            configs.append(load_config(path))
+        config = OmegaConf.merge(*configs)
+    if merge_dicts is not None:
+        if isinstance(merge_dicts, dict):
+            merge_dicts = [merge_dicts]
+        for merge_dict in merge_dicts:
+            config = OmegaConf.merge(config, merge_dict)
+    if override is not None:
+        if isinstance(override, str):
+            override = [override]
+        if isinstance(override, list):
+            config = OmegaConf.merge(config, OmegaConf.from_dotlist(override))
+        else:
+            config = OmegaConf.merge(config, override)
+    config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
+    if result_path is not None:
+        result_path = Path(result_path)
+        parent = result_path.parent
+        if not parent.exists():
+            logging.debug(f'Creating directory {parent}')
+            parent.mkdir(parents=True, exist_ok=True)
+        logging.debug(f'Writing result config to {result_path}')
+        with result_path.open('wt', encoding='utf-8') as stream:
+            print(OmegaConf.to_yaml(config), file=stream)
+    return config
+
+
 def stage(
     config_path: str,
     merge_paths: Optional[Union[str, List[str]]] = None,
