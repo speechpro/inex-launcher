@@ -210,14 +210,19 @@ class OptionalFile:
 
 
 def compose(
-    config: Dict[str, Any],
+    config: Optional[Dict[str, Any]] = None,
+    config_path: Optional[str] = None,
     merge_paths: Optional[Union[str, List[str]]] = None,
     merge_dicts: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None,
     override: Optional[Union[str, List[str], Dict[str, Any]]] = None,
     result_path: Optional[str] = None,
 ) -> Dict[str, Any]:
-    if not isinstance(config, DictConfig):
-        config = OmegaConf.create(config)
+    if config is None:
+        assert config_path is not None, 'Parameters config and config_path must not be None at the same time'
+        config = load_config(config_path)
+    else:
+        if not isinstance(config, DictConfig):
+            config = OmegaConf.create(config)
     if merge_paths is not None:
         if isinstance(merge_paths, str):
             merge_paths = [merge_paths]
