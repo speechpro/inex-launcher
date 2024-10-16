@@ -1,0 +1,9 @@
+option3: ???
+
+plugins:
+  - value3
+
+value3:
+  module: inex.helpers/assign
+  options:
+    value: ${option3}

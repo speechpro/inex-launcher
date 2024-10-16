@@ -1,0 +1,16 @@
+option1: ???
+option2: ???
+
+plugins:
+  - value1
+  - value2
+
+value1:
+  module: inex.helpers/assign
+  options:
+    value: ${option1}
+
+value2:
+  module: inex.helpers/assign
+  options:
+    value: ${option2}
