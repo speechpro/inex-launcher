@@ -7,7 +7,7 @@ from inex.helpers import compose
 
 class TestModule(unittest.TestCase):
     @staticmethod
-    def test_config_file():
+    def test_compose():
         path = Path(__file__).with_suffix('.1.yaml')
         assert path.is_file()
         config = OmegaConf.load(path)

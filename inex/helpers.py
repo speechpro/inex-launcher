@@ -6,7 +6,7 @@ import logging
 import hashlib
 import subprocess
 from pathlib import Path
-from omegaconf import OmegaConf
+from omegaconf import OmegaConf, DictConfig
 from typing import Optional, List, Dict, Union, Any
 from inex.engine import execute as exec_inex
 from inex.utils.configure import load_config, create_plugin, bind_plugins
@@ -216,6 +216,8 @@ def compose(
     override: Optional[Union[str, List[str], Dict[str, Any]]] = None,
     result_path: Optional[str] = None,
 ) -> Dict[str, Any]:
+    if not isinstance(config, DictConfig):
+        config = OmegaConf.create(config)
     if merge_paths is not None:
         if isinstance(merge_paths, str):
             merge_paths = [merge_paths]
