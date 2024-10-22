@@ -7,8 +7,8 @@ import hashlib
 import subprocess
 from pathlib import Path
 from omegaconf import OmegaConf, DictConfig
-from typing import Optional, List, Dict, Union, Any
 from inex.engine import execute as exec_inex
+from typing import Optional, List, Dict, Union, Any, Literal
 from inex.utils.configure import load_config, create_plugin, bind_plugins
 
 
@@ -216,6 +216,11 @@ def compose(
     merge_dicts: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None,
     override: Optional[Union[str, List[str], Dict[str, Any]]] = None,
     result_path: Optional[str] = None,
+    check_file: Literal[
+        'override',
+        'fail_if_exists',
+        'fail_if_different',
+    ] = 'fail_if_different',
 ) -> Dict[str, Any]:
     if config is None:
         assert config_path is not None, 'Parameters config and config_path must not be None at the same time'
@@ -245,10 +250,25 @@ def compose(
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
     if result_path is not None:
         result_path = Path(result_path)
-        parent = result_path.parent
-        if not parent.exists():
-            logging.debug(f'Creating directory {parent}')
-            parent.mkdir(parents=True, exist_ok=True)
+        if result_path.is_file():
+            if check_file == 'override':
+                pass
+            elif check_file == 'fail_if_exists':
+                assert False, f'File {result_path} already exists (check_file is set to fail_if_exists)'
+            elif check_file == 'fail_if_different':
+                loaded = OmegaConf.to_container(load_config(result_path))
+                assert loaded == config, (
+                    f'New config and existing {result_path} file are different.'
+                    f'Delete file {result_path} and run script again or set check_file parameter to override'
+                )
+                return config
+            else:
+                assert False, f'Wrong check file parameter value {check_file} (must be override, fail_if_exists or fail_if_different)'
+        else:
+            parent = result_path.parent
+            if not parent.exists():
+                logging.debug(f'Creating directory {parent}')
+                parent.mkdir(parents=True, exist_ok=True)
         logging.debug(f'Writing result config to {result_path}')
         with result_path.open('wt', encoding='utf-8') as stream:
             print(OmegaConf.to_yaml(config), file=stream)
