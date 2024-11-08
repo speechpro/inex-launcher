@@ -1,9 +1,12 @@
 #!/bin/env inex
 
+params4: [1, 2, 3]
+
 plugins:
   - value1
   - value3
   - value2
+  - value4
 
 value1:
   module: inex.helpers/_import_
@@ -22,3 +25,8 @@ value2:
   options:
     config: tests/test_import.1.yaml
     plugin: value2
+
+value4:
+  module: numpy/array
+  options:
+    - ${params4}

@@ -40,7 +40,7 @@ def attribute(modname, attname):
 _cache_ = dict()
 
 
-def _import_(plugin, config, depends=None, ignore=None, **kwargs):
+def _import_(plugin, config, depends=None, ignore=None, use_cache=True, **kwargs):
     path = os.path.abspath(config)
     assert os.path.isfile(path), f'File {path} does not exist'
     plugin = plugin.strip()
@@ -57,15 +57,18 @@ def _import_(plugin, config, depends=None, ignore=None, **kwargs):
         else:
             normal_name = parts[0]
             cache_name = plugin
-    if path in _cache_:
-        logging.debug('Getting state dictionary from cache')
-        state = _cache_[path]
+    if use_cache:
+        if path in _cache_:
+            logging.debug('Getting state dictionary from cache')
+            state = _cache_[path]
+        else:
+            logging.debug('Creating new cache entry for state dictionary')
+            state = dict()
+            _cache_[path] = state
+        if cache_name in state:
+            return state[cache_name]
     else:
-        logging.debug('Creating new cache entry for state dictionary')
         state = dict()
-        _cache_[path] = state
-    if cache_name in state:
-        return state[cache_name]
     logging.debug(f'Loading config from {path}')
     config = load_config(path)
     logging.debug(f'Merging config with options\n{kwargs}')
