@@ -1,0 +1,28 @@
+#!/bin/env inex
+
+plugins:
+  - value1
+  - value2
+
+value1:
+  module: inex.helpers/_import_
+  options:
+    config: tests/test_import.2.yaml
+    plugin: value4
+    use_cache: false
+    params4: [2, 1, 3]
+
+value2:
+  module: inex.helpers/_import_
+  options:
+    config: tests/test_import.2.yaml
+    plugin: value4
+    use_cache: false
+    params4: [3, 2, 1]
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      value1: plugins.value1
+      value2: plugins.value2
