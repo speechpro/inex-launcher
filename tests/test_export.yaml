@@ -1,0 +1,36 @@
+#!/bin/env inex
+
+plugins:
+  - object1
+  - value1
+  - object2
+  - value2
+
+object1:
+  module: numpy/array
+  exports: [__all__]
+  options:
+    __args__: [[1, 2, 3]]
+
+value1:
+  module: inex.helpers/assign
+  imports:
+    value: object1.shape^0
+
+object2:
+  module: argparse/Namespace
+  exports: [__all__]
+  options:
+    shape: 5
+
+value2:
+  module: inex.helpers/assign
+  imports:
+    value: object2.shape
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      value1: plugins.value1
+      value2: plugins.value2

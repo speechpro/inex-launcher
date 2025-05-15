@@ -273,7 +273,25 @@ def create_plugin(name, config, state):
         plugin = plugin[optional_int(index)]
     if 'exports' in params:
         for attr in params['exports']:
-            if hasattr(plugin, 'export'):
+            if attr == '__all__':
+                if isinstance(plugin, dict):
+                    for attr, value in plugin.items():
+                        state[f'{name}.{attr}'] = value
+                elif hasattr(plugin, '__dict__'):
+                    for attr, value in vars(plugin).items():
+                        state[f'{name}.{attr}'] = value
+                else:
+                    for attr in dir(plugin):
+                        if not attr.startswith('__') and not attr.endswith('__'):
+                            try:
+                                value = getattr(plugin, attr)
+                                if not callable(value):
+                                    state[f'{name}.{attr}'] = value
+                            except AttributeError:
+                                pass
+                            except ValueError:
+                                pass
+            elif hasattr(plugin, 'export'):
                 state[f'{name}.{attr}'] = plugin.export(attr)
             elif hasattr(plugin, attr):
                 state[f'{name}.{attr}'] = getattr(plugin, attr)
