@@ -21,6 +21,8 @@ class TestModule(unittest.TestCase):
             conf_path = tempdir / 'test_sys_path.yaml'
             conf_path.write_text(config, encoding='utf-8')
             result = call_engine(conf_path, sys_path=str(tempdir))
+            code_path.unlink()
+            conf_path.unlink()
         assert result == 5
 
     @staticmethod
@@ -40,6 +42,8 @@ class TestModule(unittest.TestCase):
             conf_path = tempdir / 'test_sys_path.yaml'
             conf_path.write_text(config, encoding='utf-8')
             result = call_engine(conf_path)
+            code_path.unlink()
+            conf_path.unlink()
         assert result == 7
 
 
