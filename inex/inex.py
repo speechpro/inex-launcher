@@ -48,7 +48,10 @@ def start(log_level, log_path, sys_path, merge, update, config_path, stop_after=
     configure_logging(log_level=log_level, log_path=log_path)
 
     if (sys_path is not None) and (len(sys_path) > 0):
-        paths = re.split(r'[:;,|]', sys_path)
+        if sys.platform == 'linux':
+            paths = re.split(r'[:;,|]', sys_path)
+        else:
+            paths = re.split(r'[;,|]', sys_path)
         for path in paths:
             if path not in sys.path:
                 sys.path.append(path)
