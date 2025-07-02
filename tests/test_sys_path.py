@@ -9,6 +9,7 @@ class TestModule(unittest.TestCase):
     def test_cli():
         with tempfile.TemporaryDirectory() as tempdir:
             tempdir = Path(tempdir)
+            (tempdir / '__init__.py').touch()
             code = 'def get_value(value: int) -> int:\n    return value\n'
             code_path = tempdir / 'my_module_cli.py'
             code_path.write_text(code, encoding='utf-8')
@@ -27,6 +28,7 @@ class TestModule(unittest.TestCase):
     def test_config():
         with tempfile.TemporaryDirectory() as tempdir:
             tempdir = Path(tempdir)
+            (tempdir / '__init__.py').touch()
             code = 'def get_value(value: int) -> int:\n    return value\n'
             code_path = tempdir / 'my_module_config.py'
             code_path.write_text(code, encoding='utf-8')
