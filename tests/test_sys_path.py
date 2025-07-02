@@ -1,4 +1,3 @@
-import logging
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,11 +21,7 @@ class TestModule(unittest.TestCase):
             '''
             conf_path = tempdir / 'test_sys_path.yaml'
             conf_path.write_text(config, encoding='utf-8')
-            try:
-                result = call_engine(conf_path, sys_path=str(tempdir))
-            except:
-                import sys
-                logging.error(f'{sys.path = }')
+            result = call_engine(conf_path, sys_path=str(tempdir))
         assert result == 5
 
     @staticmethod
