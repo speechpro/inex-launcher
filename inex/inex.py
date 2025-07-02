@@ -19,24 +19,13 @@ def fetch(path, value=None):
     return config
 
 
-def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after=None, final_path=None):
+def start(log_level, log_path, sys_path, merge, update, config_path, stop_after=None, final_path=None):
     begin_time = datetime.now()
 
     OmegaConf.register_new_resolver('__fetch__', fetch, replace=True)
 
-    configure_logging(log_level=log_level, log_path=log_path)
-
-    if (sys_paths is not None) and (len(sys_paths) > 0):
-        paths = re.split(r'[:;,|]', sys_paths)
-        for path in paths:
-            if path not in sys.path:
-                logging.debug(f'Adding {path} to sys.path')
-                sys.path.append(path)
-
-    logging.debug('Reading configuration')
     config = load_config(config_path)
     if merge is not None:
-        logging.debug(f'Merging configs {merge}')
         configs = [config]
         for path in merge:
             configs.append(load_config(path))
@@ -45,11 +34,28 @@ def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after
     if update is not None:
         dot_list += update
     if len(dot_list) > 0:
-        logging.debug(f'Applying updates {dot_list}')
         options = OmegaConf.from_dotlist(dot_list)
         config = OmegaConf.merge(config, options)
-    logging.debug(f'Resolving config\n{config}')
     config = OmegaConf.to_container(config, resolve=True, throw_on_missing=True)
+
+    if log_level is None:
+        log_level = config.get('__log_level__', 'WARNING')
+    if log_path is None:
+        log_path = config.get('__log_path__', None)
+    if sys_path is None:
+        sys_path = config.get('__sys_path__', None)
+
+    configure_logging(log_level=log_level, log_path=log_path)
+
+    if (sys_path is not None) and (len(sys_path) > 0):
+        if sys.platform == 'linux':
+            paths = re.split(r'[:;,|]', sys_path)
+        else:
+            paths = re.split(r'[;,|]', sys_path)
+        for path in paths:
+            if path not in sys.path:
+                sys.path.append(path)
+
     logging.debug(f'Building plugin dependencies in config\n{config}')
     bind_plugins(config)
     logging.debug(f'Final config:\n{OmegaConf.to_yaml(OmegaConf.create(config))}')
@@ -84,9 +90,9 @@ def start(log_level, log_path, sys_paths, merge, update, config_path, stop_after
 def main():
     parser = argparse.ArgumentParser(description='InEx: Initialize & Execute')
     parser.add_argument('--version', '-v', action='version', version='%(prog)s {version}'.format(version=__version__))
-    parser.add_argument('--log-level', '-l', type=str, default='WARNING', help='set the root logger level')
+    parser.add_argument('--log-level', '-l', type=str, help='set the root logger level')
     parser.add_argument('--log-path', '-g', type=str, help='path to the log-file')
-    parser.add_argument('--sys-paths', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
+    parser.add_argument('--sys-path', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
     parser.add_argument(
         '--merge', '-m',
         type=str,
@@ -109,7 +115,7 @@ def main():
     start(
         log_level=args.log_level,
         log_path=args.log_path,
-        sys_paths=args.sys_paths,
+        sys_path=args.sys_path,
         merge=args.merge,
         update=args.update,
         config_path=args.config_path,
