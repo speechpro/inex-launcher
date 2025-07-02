@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from inex.inex import start
 from inex.engine import execute
@@ -27,3 +28,11 @@ def call_engine(
             config_path=str(config),
             stop_after=stop_after,
         )
+
+def close_logger():
+    logger = logging.getLogger('root')
+    for handler in logger.handlers:
+        if isinstance(handler, logging.FileHandler):
+            handler.close()
+            logger.removeHandler(handler)
+    logging.shutdown()

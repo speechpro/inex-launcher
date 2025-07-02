@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from tests.utils import call_engine
+from tests.utils import call_engine, close_logger
 
 
 class TestModule(unittest.TestCase):
@@ -21,6 +21,7 @@ class TestModule(unittest.TestCase):
             call_engine(conf_path, log_path=log_path)
             assert log_path.is_file()
             log_text = log_path.read_text(encoding='utf-8')
+            close_logger()
         assert 'WARNING - This is warning message' in log_text
 
     @staticmethod
@@ -39,6 +40,7 @@ class TestModule(unittest.TestCase):
             call_engine(conf_path, log_path=log_path)
             assert log_path.is_file()
             log_text = log_path.read_text(encoding='utf-8')
+            close_logger()
         assert len(log_text) == 0
 
     @staticmethod
@@ -57,6 +59,7 @@ class TestModule(unittest.TestCase):
             call_engine(conf_path, log_level='DEBUG', log_path=log_path)
             assert log_path.is_file()
             log_text = log_path.read_text(encoding='utf-8')
+            close_logger()
         assert 'DEBUG - This is debug message' in log_text
 
     @staticmethod
@@ -77,6 +80,7 @@ class TestModule(unittest.TestCase):
             call_engine(conf_path)
             assert log_path.is_file()
             log_text = log_path.read_text(encoding='utf-8')
+            close_logger()
         assert 'DEBUG - This is debug message' in log_text
 
     @staticmethod
@@ -97,6 +101,7 @@ class TestModule(unittest.TestCase):
             call_engine(conf_path)
             assert log_path.is_file()
             log_text = log_path.read_text(encoding='utf-8')
+            close_logger()
         assert 'WARNING - This is warning message' in log_text
 
 
