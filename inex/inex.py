@@ -1,17 +1,28 @@
+import os
 import re
 import sys
 import logging
 import argparse
+from pydoc import locate
 from pathlib import Path
 from omegaconf import OmegaConf
+from typing import Optional, Any, List
 from datetime import datetime, timedelta
 from inex.utils.configure import configure_logging, load_config, bind_plugins
 from inex.version import __version__
 from inex.engine import execute
 
 
-def fetch(path, value=None):
-    path = Path(path)
+def evaluate(expression: str, initialize: List[str] = None, **kwargs):
+    if initialize is not None:
+        for sentence in initialize:
+            exec(sentence)
+    expression = expression.format(**kwargs)
+    return eval(expression)
+
+
+def fetch(path: str, value: str = None):
+    path = Path(path).absolute()
     assert path.is_file(), f'File {path} does not exist'
     config = OmegaConf.load(path)
     if value is not None:
@@ -19,10 +30,85 @@ def fetch(path, value=None):
     return config
 
 
+def getenv(name: str, cast: Optional[str] = None) -> Any:
+    value = os.getenv(name)
+    assert value is not None, f'Environment variable with name {name} does not exist'
+    if (cast is None) or (cast == 'str'):
+        return value
+    else:
+        cast = locate(cast)
+        return cast(value)
+
+
+def setenv(name: str, value: Any) -> Any:
+    os.environ[name] = str(value)
+    return value
+
+
+def read_text(path: str, cast: Optional[str] = None) -> Any:
+    path = Path(path).absolute()
+    assert path.is_file(), f'File {path} does not exist'
+    value = path.read_text(encoding='utf-8').strip()
+    if (cast is None) or (cast == 'str'):
+        return value
+    else:
+        cast = locate(cast)
+        return cast(value)
+
+
+def num_lines(path: Any) -> int:
+    if isinstance(path, str):
+        path = Path(path).absolute()
+        assert path.is_file(), f'File {path} does not exist'
+        return len(path.read_text().strip().splitlines())
+    else:
+        return len(path)
+
+
+def path_parent(path: str) -> str:
+    return str(Path(path).absolute().parent)
+
+
+def path_name(path: str) -> str:
+    return Path(path).name
+
+
+def path_stem(path: str) -> str:
+    return Path(path).stem
+
+
+def path_suffix(path: str) -> str:
+    return Path(path).suffix
+
+
+def path_is_file(path: str) -> bool:
+    return Path(path).is_file()
+
+
+def path_is_dir(path: str) -> bool:
+    return Path(path).is_dir()
+
+
+def path_exists(path: str) -> bool:
+    return Path(path).exists()
+
+
 def start(log_level, log_path, sys_path, merge, update, config_path, stop_after=None, final_path=None):
     begin_time = datetime.now()
 
+    OmegaConf.register_new_resolver('__evaluate__', evaluate, replace=True)
     OmegaConf.register_new_resolver('__fetch__', fetch, replace=True)
+    OmegaConf.register_new_resolver('__getenv__', getenv, replace=True)
+    OmegaConf.register_new_resolver('__setenv__', setenv, replace=True)
+    OmegaConf.register_new_resolver('__read_text__', read_text, replace=True)
+    OmegaConf.register_new_resolver('__num_lines__', num_lines, replace=True)
+    OmegaConf.register_new_resolver('__path_parent__', path_parent, replace=True)
+    OmegaConf.register_new_resolver('__path_name__', path_name, replace=True)
+    OmegaConf.register_new_resolver('__path_stem__', path_stem, replace=True)
+    OmegaConf.register_new_resolver('__path_suffix__', path_suffix, replace=True)
+    OmegaConf.register_new_resolver('__path_is_file__', path_is_file, replace=True)
+    OmegaConf.register_new_resolver('__path_is_dir__', path_is_dir, replace=True)
+    OmegaConf.register_new_resolver('__path_exists__', path_exists, replace=True)
 
     config = load_config(config_path)
     if merge is not None:
@@ -62,7 +148,7 @@ def start(log_level, log_path, sys_path, merge, update, config_path, stop_after=
 
     if final_path is not None:
         logging.debug(f'Writing final config to {final_path}')
-        final_path = Path(final_path)
+        final_path = Path(final_path).absolute()
         parent = final_path.parent
         if not parent.exists():
             logging.debug(f'Creating directory {parent}')

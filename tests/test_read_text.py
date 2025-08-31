@@ -7,13 +7,13 @@ from tests.utils import call_engine
 class TestModule(unittest.TestCase):
     @staticmethod
     def test_config_file():
-        config = Path(__file__).with_suffix('.2.yaml')
+        config = Path(__file__).with_suffix('.yaml')
         assert config.is_file()
         values: Dict[str, Any] = call_engine(config)
-        assert values['a'] == 1
-        assert values['b'] == 2
-        assert values['c'] == [3, 4, 5]
-        assert values['d'] == [3, 4, 5]
+        assert values['value_str'] == '17'
+        assert values['value_int'] == 17
+        assert values['value_float'] == 17.0
+        assert values['value_bool']
 
 
 if __name__ == '__main__':
