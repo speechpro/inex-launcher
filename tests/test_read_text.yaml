@@ -1,0 +1,17 @@
+#!/bin/env inex
+
+path_txt: tests/test_read_text.txt
+
+value_str: ${__read_text__:${path_txt}, str}
+value_int: ${__read_text__:${path_txt}, int}
+value_float: ${__read_text__:${path_txt}, float}
+value_bool: ${__read_text__:${path_txt}, 'bool'}
+
+execute:
+  method: inex.helpers/assign
+  options:
+    value:
+      value_str: ${value_str}
+      value_int: ${value_int}
+      value_float: ${value_float}
+      value_bool: ${value_bool}

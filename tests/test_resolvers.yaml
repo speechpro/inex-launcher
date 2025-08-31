@@ -1,0 +1,36 @@
+#!/bin/env inex
+
+a: 2
+b: 3
+evaluate1: ${__evaluate__:'${a}^2 + ${b}'}
+evaluate2: ${__evaluate__:'int(np.sum(np.array([1, 2, 3])))', [import numpy as np]}
+
+seven_set: ${__setenv__:Seven, 7}
+seven_get: ${__getenv__:Seven, int}
+
+path_yaml: tests/test_resolvers.yaml
+
+path_parent: ${__path_parent__:${path_yaml}}
+path_name: ${__path_name__:${path_yaml}}
+path_stem: ${__path_stem__:${path_yaml}}
+path_suffix: ${__path_suffix__:${path_yaml}}
+path_is_file: ${__path_is_file__:${path_yaml}}
+path_is_dir: ${__path_is_dir__:${path_yaml}}
+path_exists: ${__path_exists__:${path_yaml}}
+
+execute:
+  title: ' Testing resolvers'
+  method: inex.helpers/assign
+  options:
+    value:
+      evaluate1: ${evaluate1}
+      evaluate2: ${evaluate2}
+      seven_set: ${seven_set}
+      seven_get: ${seven_get}
+      path_parent: ${path_parent}
+      path_name: ${path_name}
+      path_stem: ${path_stem}
+      path_suffix: ${path_suffix}
+      path_is_file: ${path_is_file}
+      path_is_dir: ${path_is_dir}
+      path_exists: ${path_exists}

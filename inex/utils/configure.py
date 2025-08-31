@@ -161,6 +161,9 @@ def resolve_option(option, state):
 def create_plugin(name, config, state):
     assert name in config, f'Failed find module {name} in config\n{config}'
     params = config[name]
+    title = params.get('title', None)
+    if title is not None:
+        print(title, flush=True)
     if name == 'execute':
         assert 'method' in params, f'Failed to find "method" in execute section\n{params}'
         modname = params['method']

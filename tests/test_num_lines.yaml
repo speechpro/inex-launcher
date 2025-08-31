@@ -1,0 +1,27 @@
+#!/bin/env inex
+
+path_conf: tests/test_num_lines.yaml
+path_test: tests/test_num_lines.py
+
+lines:
+  - 1
+  - 2
+  - 3
+
+options:
+  key1: value1
+  key2: value2
+
+num1: ${__num_lines__:${path_conf}}
+num2: ${__num_lines__:${path_test}}
+num3: ${__num_lines__:${lines}}
+num4: ${__num_lines__:${options}}
+
+execute:
+  method: inex.helpers/assign
+  options:
+    value:
+      num1: ${num1}
+      num2: ${num2}
+      num3: ${num3}
+      num4: ${num4}
