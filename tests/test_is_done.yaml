@@ -1,0 +1,35 @@
+#!/bin/env inex
+
+is_done: tests/.done
+
+plugins:
+  - value1
+  - value2
+
+value1:
+  module: tests.test_basic/return_value
+  is_done: ${is_done}
+  before:
+    exists: tests/src_data.txt
+    delete: tests/old_data.txt
+    mkdir: tests/temp_dir
+  after:
+    exists: tests/temp_dir
+    delete:
+      - tests/src_data.txt
+      - tests/temp_dir
+  options:
+    value: 5
+
+value2:
+  module: tests.test_basic/return_value
+  is_done: ${is_done}
+  options:
+    value: 7
+
+execute:
+  method: inex.helpers/assign
+  imports:
+    value:
+      value1: plugins.value1
+      value2: plugins.value2

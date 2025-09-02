@@ -13,3 +13,4 @@ __pycache__/
 /*.so
 /inex/version.py
 /commands.txt
+/tests/.done
