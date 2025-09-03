@@ -9,6 +9,8 @@ from pathlib import Path
 import yaml.parser
 from omegaconf import OmegaConf, DictConfig, ListConfig
 
+from inex.utils.fsystem import execute_commands
+
 
 def configure_logging(log_level, log_path=None):
     handlers = {
@@ -161,6 +163,15 @@ def resolve_option(option, state):
 def create_plugin(name, config, state):
     assert name in config, f'Failed find module {name} in config\n{config}'
     params = config[name]
+    is_done = params.get('is_done', None)
+    if is_done is not None:
+        is_done = Path(is_done)
+        if is_done.exists():
+            state[f'plugins.{name}'] = None
+            return None
+    commands = params.get('before', None)
+    if commands is not None:
+        execute_commands(commands=commands, plugin=name)
     title = params.get('title', None)
     if title is not None:
         print(title, flush=True)
@@ -301,4 +312,9 @@ def create_plugin(name, config, state):
             else:
                 assert False, f'Plugin {type(plugin)} does not have attribute {attr} for plugin {name} in config\n{config}'
     state[f'plugins.{name}'] = plugin
+    commands = params.get('after', None)
+    if commands is not None:
+        execute_commands(commands=commands, plugin=name)
+    if is_done is not None:
+        is_done.touch()
     return plugin
