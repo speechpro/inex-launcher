@@ -15,7 +15,7 @@ path_name: ${__path_name__:${path_yaml}}
 path_stem: ${__path_stem__:${path_yaml}}
 path_suffix: ${__path_suffix__:${path_yaml}}
 path_is_file: ${__path_is_file__:${path_yaml}}
-path_is_dir: ${__path_is_dir__:${path_yaml}}
+path_is_dir: ${__path_is_dir__:${path_parent}}
 path_exists: ${__path_exists__:${path_yaml}}
 
 execute:
