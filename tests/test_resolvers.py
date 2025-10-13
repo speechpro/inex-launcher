@@ -20,9 +20,6 @@ class TestModule(unittest.TestCase):
         assert values['path_name'] == 'test_resolvers.yaml'
         assert values['path_stem'] == 'test_resolvers'
         assert values['path_suffix'] == '.yaml'
-        assert values['path_is_file']
-        assert not values['path_is_dir']
-        assert values['path_exists']
 
 
 if __name__ == '__main__':

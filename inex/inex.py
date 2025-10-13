@@ -81,16 +81,16 @@ def path_suffix(path: str) -> str:
     return Path(path).suffix
 
 
-def path_is_file(path: str) -> bool:
-    return Path(path).is_file()
+def path_is_file(path: str) -> None:
+    assert Path(path).is_file(), f'File {path} does not exist'
 
 
-def path_is_dir(path: str) -> bool:
-    return Path(path).is_dir()
+def path_is_dir(path: str) -> None:
+    assert Path(path).is_dir(), f'Directory {path} does not exist'
 
 
-def path_exists(path: str) -> bool:
-    return Path(path).exists()
+def path_exists(path: str) -> None:
+    assert Path(path).exists(), f'Path {path} does not exist'
 
 
 def start(log_level, log_path, sys_path, merge, update, config_path, stop_after=None, final_path=None):
