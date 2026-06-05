@@ -1,0 +1,9 @@
+# Normalize line endings to LF on checkout for all platforms.
+# Keeps `ruff format` (line-ending = "lf") consistent across Linux/macOS/Windows CI.
+* text=auto eol=lf
+
+# Binary files: let git detect and never normalize.
+*.png binary
+*.jpg binary
+*.gz binary
+*.zip binary
