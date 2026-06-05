@@ -1,0 +1,4 @@
+interface:
+  display_name: "InEx Launcher"
+  short_description: "Build CLI utilities with InEx configs"
+  default_prompt: "Use $inex-launcher to design a Python CLI utility backed by an InEx YAML config."
