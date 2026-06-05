@@ -16,11 +16,12 @@ from inex.utils.configure import bind_plugins, configure_logging, load_config
 
 
 def evaluate(expression: str, initialize: List[str] = None, **kwargs):
+    namespace: dict = {}
     if initialize is not None:
         for sentence in initialize:
-            exec(sentence)
+            exec(sentence, namespace)
     expression = expression.format(**kwargs)
-    return eval(expression)
+    return eval(expression, namespace)
 
 
 def fetch(path: str, value: str = None):

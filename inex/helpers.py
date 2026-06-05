@@ -33,11 +33,12 @@ def read_text(path):
 
 
 def evaluate(expression: str, initialize: List[str] = None, **kwargs):
+    namespace: dict = {}
     if initialize is not None:
         for sentence in initialize:
-            exec(sentence)
+            exec(sentence, namespace)
     expression = expression.format(**kwargs)
-    return eval(expression)
+    return eval(expression, namespace)
 
 
 def attribute(modname, attname):
