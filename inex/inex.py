@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 from typing import Optional, Any, List
 from datetime import datetime, timedelta
 from inex.utils.configure import configure_logging, load_config, bind_plugins
-from inex.version import __version__
+from inex import __version__
 from inex.engine import execute
 
 

@@ -1,11 +1,66 @@
 [build-system]
-requires = [
-    "setuptools",
-    "wheel",
-]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.pytest.ini_options]
-testpaths = [
-    "tests",
+[project]
+name = "inex-launcher"
+version = "3.1.6"
+description = "InEx is a lightweight highly configurable Python launcher based on microkernel architecture"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+authors = [
+    { name = "Yuri Khokhlov", email = "khokhlov@speechpro.com" },
 ]
+keywords = [
+    "speechpro",
+    "inex",
+    "launcher",
+    "inex-launcher",
+    "command-line",
+    "configuration",
+    "yaml",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+]
+dependencies = [
+    "omegaconf",
+    "networkx",
+]
+
+[project.urls]
+Homepage = "https://github.com/speechpro/inex-launcher"
+"Bug Tracker" = "https://github.com/speechpro/inex-launcher/issues"
+
+[project.scripts]
+inex = "inex.inex:main"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+indent-width = 4
+line-length = 140
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = []
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"

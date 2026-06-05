@@ -11,6 +11,5 @@ __pycache__/
 /build/
 /dist/
 /*.so
-/inex/version.py
 /commands.txt
 /tests/.done
