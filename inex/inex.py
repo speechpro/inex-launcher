@@ -1,24 +1,27 @@
+import argparse
+import logging
 import os
 import re
 import sys
-import logging
-import argparse
-from pydoc import locate
-from pathlib import Path
-from omegaconf import OmegaConf
-from typing import Optional, Any, List
 from datetime import datetime, timedelta
-from inex.utils.configure import configure_logging, load_config, bind_plugins
-from inex.version import __version__
+from pathlib import Path
+from pydoc import locate
+from typing import Any, List, Optional
+
+from omegaconf import OmegaConf
+
+from inex import __version__
 from inex.engine import execute
+from inex.utils.configure import bind_plugins, configure_logging, load_config
 
 
 def evaluate(expression: str, initialize: List[str] = None, **kwargs):
+    namespace: dict = {}
     if initialize is not None:
         for sentence in initialize:
-            exec(sentence)
+            exec(sentence, namespace)
     expression = expression.format(**kwargs)
-    return eval(expression)
+    return eval(expression, namespace)
 
 
 def fetch(path: str, value: str = None):
@@ -179,23 +182,14 @@ def main():
     parser.add_argument('--log-level', '-l', type=str, help='set the root logger level')
     parser.add_argument('--log-path', '-g', type=str, help='path to the log-file')
     parser.add_argument('--sys-path', '-s', type=str, help='paths to add to the list of system paths (sys.path)')
+    parser.add_argument('--merge', '-m', type=str, action='append', help='path to the configuration file to be merged with the main config')
     parser.add_argument(
-        '--merge', '-m',
-        type=str,
-        action='append',
-        help='path to the configuration file to be merged with the main config'
+        '--update', '-u', type=str, action='append', help='update or set value for some parameter (use "dot" notation: "key1.key2=value")'
     )
-    parser.add_argument(
-        '--update', '-u',
-        type=str,
-        action='append',
-        help='update or set value for some parameter (use "dot" notation: "key1.key2=value")')
     parser.add_argument('--stop-after', '-a', type=str, help='stop execution after the specified plugin is initialized')
     parser.add_argument('--final-path', '-f', type=str, help='write final config to the specified file')
     parser.add_argument(
-        'config_path',
-        type=str,
-        help='path to the configuration file (in YAML or JSON) or string with configuration in YAML'
+        'config_path', type=str, help='path to the configuration file (in YAML or JSON) or string with configuration in YAML'
     )
     args = parser.parse_args()
     start(

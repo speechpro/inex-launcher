@@ -1,8 +1,10 @@
-import pytest
-import unittest
 import tempfile
+import unittest
 from pathlib import Path
+
+import pytest
 from omegaconf import OmegaConf
+
 from inex.helpers import compose
 
 

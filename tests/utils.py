@@ -1,16 +1,17 @@
 import logging
 from pathlib import Path
-from inex.inex import start
-from inex.engine import execute
 from typing import Optional, Union
+
+from inex.engine import execute
+from inex.inex import start
 
 
 def call_engine(
-        config,
-        log_level: Optional[str] = None,
-        log_path: Optional[Union[str, Path]] = None,
-        sys_path: Optional[str] = None,
-        stop_after: Optional[str] = None,
+    config,
+    log_level: Optional[str] = None,
+    log_path: Optional[Union[str, Path]] = None,
+    sys_path: Optional[str] = None,
+    stop_after: Optional[str] = None,
 ):
     if isinstance(config, dict):
         state = {
@@ -28,6 +29,7 @@ def call_engine(
             config_path=str(config),
             stop_after=stop_after,
         )
+
 
 def close_logger():
     logger = logging.getLogger('root')

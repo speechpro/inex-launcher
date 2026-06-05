@@ -1,40 +1,40 @@
-import re
-import sys
 import logging
 import logging.config
-import networkx as nx
-from typing import Union
+import re
+import sys
 from pathlib import Path
+from typing import Union
 
+import networkx as nx
 import yaml.parser
-from omegaconf import OmegaConf, DictConfig, ListConfig
+from omegaconf import DictConfig, ListConfig, OmegaConf
 
 from inex.utils.fsystem import execute_commands
 
 
 def configure_logging(log_level, log_path=None):
     handlers = {
-        "inex_out": {
-            "class": "logging.StreamHandler",
-            "formatter": "inex_basic",
-            "stream": "ext://sys.stderr",
+        'inex_out': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'inex_basic',
+            'stream': 'ext://sys.stderr',
         }
     }
     if log_path is not None:
         handlers['inex_file'] = {
-            "class": "logging.FileHandler",
-            "formatter": "inex_basic",
-            "filename": log_path,
-            "mode": "w",
-            "encoding": "utf-8"
+            'class': 'logging.FileHandler',
+            'formatter': 'inex_basic',
+            'filename': log_path,
+            'mode': 'w',
+            'encoding': 'utf-8',
         }
     CONFIG = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {"inex_basic": {"format": '%(asctime)s %(name)s %(pathname)s:%(lineno)d - %(levelname)s - %(message)s'}},
-        "handlers": handlers,
-        "loggers": {"inex": {"handlers": handlers.keys(), "level": log_level}},
-        "root": {"handlers": handlers.keys(), "level": log_level}
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {'inex_basic': {'format': '%(asctime)s %(name)s %(pathname)s:%(lineno)d - %(levelname)s - %(message)s'}},
+        'handlers': handlers,
+        'loggers': {'inex': {'handlers': handlers.keys(), 'level': log_level}},
+        'root': {'handlers': handlers.keys(), 'level': log_level},
     }
     logging.config.dictConfig(CONFIG)
 
@@ -222,24 +222,23 @@ def create_plugin(name, config, state):
                 if len(parts) == 1:
                     idx = None
                 else:
-                    assert len(parts) == 2, \
-                        f'Wrong importing value index format ({parts=}) for plugin {name} in config\n{config}'
+                    assert len(parts) == 2, f'Wrong importing value index format ({parts=}) for plugin {name} in config\n{config}'
                     value = parts[0]
                     idx = parts[1]
                 assert value in state, f'Failed to resolve importing value {value} for plugin {name} in config\n{config}'
                 value = state[value]
                 if idx is not None:
-                    assert hasattr(value, '__getitem__'), \
-                        f'Imported class {type(value)} does not have attribute ' \
-                        f'__getitem__ for plugin {name} in config\n{config}'
+                    assert hasattr(value, '__getitem__'), (
+                        f'Imported class {type(value)} does not have attribute __getitem__ for plugin {name} in config\n{config}'
+                    )
                     value = value[optional_int(idx)]
                 kwargs[key] = value
             else:
                 kwargs[key] = resolve_option(value, state)
     if (
-            ('__mute__' in config)
-            and ((name in config['__mute__']) or ('__all__' in config['__mute__']))
-            and (('__unmute__' not in config) or (name not in config['__unmute__']))
+        ('__mute__' in config)
+        and ((name in config['__mute__']) or ('__all__' in config['__mute__']))
+        and (('__unmute__' not in config) or (name not in config['__unmute__']))
     ):
         logging.debug(f'Creating plugin {name}')
     else:
@@ -249,8 +248,7 @@ def create_plugin(name, config, state):
         if classname is None:
             plugin = plugin(*args, **kwargs)
         else:
-            assert hasattr(plugin, classname), \
-                f'Plugin {modname} does not have attribute {classname} for plugin {name} in config\n{config}'
+            assert hasattr(plugin, classname), f'Plugin {modname} does not have attribute {classname} for plugin {name} in config\n{config}'
             method = getattr(plugin, classname)
             plugin = method(*args, **kwargs)
     else:
@@ -267,23 +265,27 @@ def create_plugin(name, config, state):
                 logging.debug(f'Creating plugin {name} with class name {classname} from module {modname}')
                 parts = classname.split('.')
                 if len(parts) == 1:
-                    assert hasattr(module, classname), \
+                    assert hasattr(module, classname), (
                         f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
+                    )
                     classtype = getattr(module, classname)
                     plugin = classtype(*args, **kwargs)
                 else:
                     classname = parts[0]
                     attribute = parts[1]
-                    assert hasattr(module, classname), \
+                    assert hasattr(module, classname), (
                         f'Module {modname} does not have class {classname} for plugin {name} in config\n{config}'
+                    )
                     classtype = getattr(module, classname)
-                    assert hasattr(classtype, attribute), \
+                    assert hasattr(classtype, attribute), (
                         f'Class {classname} does not have attribute {attribute} for plugin {name} in config\n{config}'
+                    )
                     method = getattr(classtype, attribute)
                     plugin = method(*args, **kwargs)
     if index is not None:
-        assert hasattr(plugin, '__getitem__'), \
+        assert hasattr(plugin, '__getitem__'), (
             f'Class {type(plugin)} does not have attribute __getitem__ for plugin {name} in config\n{config}'
+        )
         plugin = plugin[optional_int(index)]
     if 'exports' in params:
         for attr in params['exports']:

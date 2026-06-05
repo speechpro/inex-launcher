@@ -1,4 +1,5 @@
 import logging
+
 from inex.utils.configure import create_plugin
 
 

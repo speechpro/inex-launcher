@@ -1,7 +1,9 @@
 import unittest
-import numpy as np
-from typing import List
 from pathlib import Path
+from typing import List
+
+import numpy as np
+
 from tests.utils import call_engine
 
 

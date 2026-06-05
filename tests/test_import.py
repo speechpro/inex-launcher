@@ -1,7 +1,9 @@
 import unittest
-import numpy as np
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
+import numpy as np
+
 from tests.utils import call_engine
 
 
@@ -17,7 +19,6 @@ class TestModule(unittest.TestCase):
         id2 = id(values['value2'])
         id3 = id(values['value3'])
         assert id3 == id2
-
 
     @staticmethod
     def test_without_cache():

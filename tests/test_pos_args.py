@@ -1,7 +1,9 @@
 import unittest
-import numpy as np
 from pathlib import Path
 from typing import List, Union
+
+import numpy as np
+
 from tests.utils import call_engine
 
 
@@ -22,7 +24,7 @@ class TestModule(unittest.TestCase):
         config = Path(__file__).with_suffix('.yaml')
         assert config.is_file()
         objects: List[Union[Object, np.ndarray]] = call_engine(config)
-        for object in objects[0: 2]:
+        for object in objects[0:2]:
             assert object.a == 1
             assert object.b == 2
             assert object.c == [3, 4]

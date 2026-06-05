@@ -1,22 +1,24 @@
+import logging
 import os
 import shutil
-import logging
 import subprocess
 from pathlib import Path
-from omegaconf import OmegaConf, DictConfig
+from typing import Any, Dict, List, Literal, Optional, Union
+
+from omegaconf import DictConfig, OmegaConf
+
 from inex.engine import execute as exec_inex
-from typing import Optional, List, Dict, Union, Any, Literal
 from inex.utils.configure import (
-    load_config,
-    create_plugin,
     bind_plugins,
+    create_plugin,
+    load_config,
 )
 from inex.utils.fsystem import (
-    check_md5_hash,
-    check_existence,
-    remove_paths,
-    make_directories,
     OptionalFile,
+    check_existence,
+    check_md5_hash,
+    make_directories,
+    remove_paths,
 )
 
 
@@ -31,11 +33,12 @@ def read_text(path):
 
 
 def evaluate(expression: str, initialize: List[str] = None, **kwargs):
+    namespace: dict = {}
     if initialize is not None:
         for sentence in initialize:
-            exec(sentence)
+            exec(sentence, namespace)
     expression = expression.format(**kwargs)
-    return eval(expression)
+    return eval(expression, namespace)
 
 
 def attribute(modname, attname):

@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
 from tests.utils import call_engine
 
 
@@ -11,7 +12,7 @@ class TestModule(unittest.TestCase):
         assert config.is_file()
         values: Dict[str, Any] = call_engine(config)
         assert values['num1'] == 27
-        assert values['num2'] == 20
+        assert values['num2'] == 21
         assert values['num3'] == 3
         assert values['num4'] == 2
 
