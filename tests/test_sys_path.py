@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+
 from tests.utils import call_engine
 
 
@@ -13,12 +14,12 @@ class TestModule(unittest.TestCase):
             code = 'def get_value(value: int) -> int:\n    return value\n'
             code_path = tempdir / 'my_module_cli.py'
             code_path.write_text(code, encoding='utf-8')
-            config = f'''
+            config = """
             execute:
               method: my_module_cli/get_value
               options:
                 value: 5
-            '''
+            """
             conf_path = tempdir / 'test_sys_path.yaml'
             conf_path.write_text(config, encoding='utf-8')
             result = call_engine(conf_path, sys_path=str(tempdir))
@@ -32,13 +33,13 @@ class TestModule(unittest.TestCase):
             code = 'def get_value(value: int) -> int:\n    return value\n'
             code_path = tempdir / 'my_module_config.py'
             code_path.write_text(code, encoding='utf-8')
-            config = f'''
+            config = f"""
             __sys_path__: {tempdir}
             execute:
               method: my_module_config/get_value
               options:
                 value: 7
-            '''
+            """
             conf_path = tempdir / 'test_sys_path.yaml'
             conf_path.write_text(config, encoding='utf-8')
             result = call_engine(conf_path)

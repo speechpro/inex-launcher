@@ -1,10 +1,10 @@
-import gzip
 import glob
-import shutil
+import gzip
 import hashlib
 import logging
+import shutil
 from pathlib import Path
-from typing import Optional, Mapping
+from typing import Mapping, Optional
 
 
 def compute_md5_hash(path):

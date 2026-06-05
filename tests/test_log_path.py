@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+
 from tests.utils import call_engine, close_logger
 
 
@@ -11,12 +12,12 @@ class TestModule(unittest.TestCase):
             tempdir = Path(tempdir)
             conf_path = tempdir / 'test_log_path.yaml'
             log_path = tempdir / 'test_log_path.log'
-            config = f'''
+            config = """
             execute:
               method: logging/warning
               options:
                 msg: 'This is warning message'
-            '''
+            """
             conf_path.write_text(config, encoding='utf-8')
             call_engine(conf_path, log_path=log_path)
             assert log_path.is_file()
@@ -30,12 +31,12 @@ class TestModule(unittest.TestCase):
             tempdir = Path(tempdir)
             conf_path = tempdir / 'test_log_path.yaml'
             log_path = tempdir / 'test_log_path.log'
-            config = f'''
+            config = """
             execute:
               method: logging/debug
               options:
                 msg: 'This is debug message'
-            '''
+            """
             conf_path.write_text(config, encoding='utf-8')
             call_engine(conf_path, log_path=log_path)
             assert log_path.is_file()
@@ -49,12 +50,12 @@ class TestModule(unittest.TestCase):
             tempdir = Path(tempdir)
             conf_path = tempdir / 'test_log_path.yaml'
             log_path = tempdir / 'test_log_path.log'
-            config = f'''
+            config = """
             execute:
               method: logging/debug
               options:
                 msg: 'This is debug message'
-            '''
+            """
             conf_path.write_text(config, encoding='utf-8')
             call_engine(conf_path, log_level='DEBUG', log_path=log_path)
             assert log_path.is_file()
@@ -68,14 +69,14 @@ class TestModule(unittest.TestCase):
             tempdir = Path(tempdir)
             conf_path = tempdir / 'test_log_path.yaml'
             log_path = tempdir / 'test_log_path.log'
-            config = f'''
+            config = f"""
             __log_level__: DEBUG
             __log_path__: {str(log_path)}
             execute:
               method: logging/debug
               options:
                 msg: 'This is debug message'
-            '''
+            """
             conf_path.write_text(config, encoding='utf-8')
             call_engine(conf_path)
             assert log_path.is_file()
@@ -89,14 +90,14 @@ class TestModule(unittest.TestCase):
             tempdir = Path(tempdir)
             conf_path = tempdir / 'test_log_path.yaml'
             log_path = tempdir / 'test_log_path.log'
-            config = f'''
+            config = f"""
             __log_level__: WARNING
             __log_path__: {str(log_path)}
             execute:
               method: logging/warning
               options:
                 msg: 'This is warning message'
-            '''
+            """
             conf_path.write_text(config, encoding='utf-8')
             call_engine(conf_path)
             assert log_path.is_file()
