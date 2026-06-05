@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+requires = ["setuptools>=64", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "inex-launcher"
-version = "3.1.6"
+dynamic = ["version"]
 description = "InEx is a lightweight highly configurable Python launcher based on microkernel architecture"
 readme = "README.md"
 license = { text = "MIT" }
@@ -52,6 +52,8 @@ inex = "inex.inex:main"
 
 [tool.setuptools.packages.find]
 exclude = ["tests*"]
+
+[tool.setuptools_scm]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

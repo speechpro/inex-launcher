@@ -35,7 +35,6 @@ wheels = [
 
 [[package]]
 name = "inex-launcher"
-version = "3.1.6"
 source = { editable = "." }
 dependencies = [
     { name = "networkx", version = "3.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
