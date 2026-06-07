@@ -359,6 +359,173 @@ myproject/
 
 ---
 
+## ML Experiment Engineering Guidelines
+
+InEx was designed for scientific ML work: data cleaning and annotation, dataset
+preparation, neural network training and fine-tuning, inference, embedding
+extraction, decoding, statistics, and result analysis. The guidelines below
+apply whenever you create or modify Python modules and YAML configs in this
+context.
+
+### 1. Purpose and philosophy
+
+The primary goal of inex-launcher is to make creating and configuring ML
+experiment CLIs as simple and transparent as possible. A single YAML file should
+be enough for a reader to understand what a utility does, what its components
+are, and how they connect — without reading the Python source first.
+
+### 2. Reuse before creating
+
+Before writing a new module, check whether an existing class, function, or
+utility in the current project already solves the problem. If it does, import it
+in YAML directly. If a publicly installable package (e.g. `torch`, `torchaudio`,
+`datasets`, `librosa`, `sklearn`) covers the need, wire it as a plugin rather
+than wrapping it in new code. Write new code only when no suitable existing
+component exists.
+
+```yaml
+# Prefer: wire existing public class directly
+normalizer:
+  module: sklearn.preprocessing/StandardScaler
+
+# Avoid: writing a thin MyNormalizer wrapper just to call StandardScaler
+```
+
+### 3. Design modules for reuse
+
+When writing a new Python module, design its interface as if it will be used in
+multiple future projects. Concretely:
+
+- Accept domain objects through `imports` (datasets, models, tokenizers) and
+  plain values through `options` (paths, scalars, flags). Avoid hardcoding
+  project-specific paths or constants inside classes.
+- Prefer narrow, single-responsibility classes and functions over feature-rich
+  "super-modules". A focused `AudioReader`, `FeatureExtractor`, `ScoreComputer`
+  is easier to reuse than a monolithic `Pipeline` that does everything.
+- Use standard Python typing where it adds clarity without verbosity.
+
+### 4. Backward compatibility when modifying shared modules
+
+If you need to extend or fix an existing module that is already used by other
+utilities in the project, preserve backward compatibility:
+
+- Do not change or remove existing `__init__` / function parameters that are
+  already referenced in YAML configs.
+- Add new parameters with default values so that existing configs continue to
+  work unchanged.
+- If a behavioral change is unavoidable, introduce it under a new parameter flag
+  (e.g. `use_new_logic: bool = False`) rather than silently altering the default
+  behavior.
+
+```python
+# Good: add optional parameter with a safe default
+class FeatureExtractor:
+    def __init__(self, sample_rate: int, normalize: bool = False):
+        ...
+
+# Bad: change existing parameter semantics without a default guard
+```
+
+### 5. Testable and mockable code
+
+In scientific work, 100% unit-test coverage is often impractical. Still, new
+code should be written so that unit tests and mocking are straightforward:
+
+- Keep side effects (file I/O, network calls, GPU operations) at the boundary —
+  in the `execute` function or a clearly named `write_*` / `load_*` helper — not
+  buried inside constructors or core logic methods.
+- Prefer dependency injection (pass `model`, `device`, `reader` as constructor
+  arguments via `imports`) over creating them internally. Injected objects can
+  be mocked easily in tests.
+- Avoid global state and module-level initialization that runs on import.
+
+```python
+# Good: injectable, mockable
+class Scorer:
+    def __init__(self, model, device):
+        self.model = model
+        self.device = device
+
+# Avoid: creates its own model internally, hard to test without loading weights
+class Scorer:
+    def __init__(self, checkpoint_path: str):
+        self.model = load_model(checkpoint_path)  # side effect in constructor
+```
+
+### 6. Avoid super-modules
+
+Do not create large modules that try to handle data loading, transformation,
+model forward pass, and output writing in one class. Split functionality into
+small, focused classes/functions and use the plugin chain to compose them in
+YAML. A module that is too large to describe in one sentence is probably doing
+too much.
+
+```python
+# Avoid
+class ExperimentRunner:
+    def run(self, input_path, checkpoint, output_path): ...
+
+# Prefer: separate plugins composed in YAML
+# plugins: [reader, model, scorer, writer]
+```
+
+### 7. YAML config as a readable document
+
+The YAML config is the primary documentation of a CLI utility's structure. Write
+it so that a new team member can understand what the utility does by reading the
+config alone:
+
+- Use descriptive `snake_case` plugin keys that reflect the component's role
+  (`audio_reader`, `feature_extractor`, `score_computer`, `result_writer`), not
+  generic names (`obj1`, `stage2`).
+- Group plugin definitions in the order they execute — top-down mirrors the data
+  flow.
+- Keep top-level parameter names clear and concise (`input_dir`,
+  `checkpoint_path`, `output_dir`, `batch_size`), not abbreviated to the point of
+  obscurity.
+- Use `???` for required parameters; provide sensible defaults for optional
+  tuning parameters at the top of the config.
+
+```yaml
+# Good
+input_dir: ???
+checkpoint_path: ???
+output_dir: ???
+batch_size: 32
+plugins: [feature_reader, acoustic_model, decoder, result_writer]
+
+# Avoid
+inp: ???
+ckpt: ???
+bs: 32
+plugins: [p1, p2, p3]
+```
+
+### 8. Comments in configs and modules
+
+Short, purposeful comments are welcome and encouraged:
+
+- In YAML: add a brief inline comment on parameters whose purpose is not obvious
+  from the name (units, valid ranges, relationship to a paper's notation).
+  Group-level comments (`# --- Feature extraction ---`) help orient readers in
+  long configs.
+- In Python: add docstrings to public classes and functions when the interface
+  contract is non-trivial. Inline comments should explain *why*, not restate
+  *what* the code does.
+- Do not add comments that just echo the code or inflate line count.
+
+```yaml
+sample_rate: 16000    # Hz; must match the training data sample rate
+hop_length: 160       # samples; 10 ms at 16 kHz
+n_mels: 80            # mel filterbank bins
+
+# --- Acoustic model ---
+acoustic_model:
+  module: myproject.models/AcousticModel
+```
+
+---
+
 ## Anti-patterns
 
 - Putting a plugin object in `options` instead of `imports` (won't resolve from

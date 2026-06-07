@@ -24,6 +24,8 @@ Contents:
 12. [Model factory selected by name](#12-model-factory)
 13. [The exports rule in practice](#13-the-exports-rule-in-practice)
 14. [Quick-start template](#14-quick-start-template)
+15. [Wire a public library class as a plugin](#15-wire-a-public-library-class)
+16. [Focused, injectable module for reuse](#16-focused-injectable-module)
 
 ---
 
@@ -840,3 +842,151 @@ def process(inputs: dict, output_dir: str) -> None: ...
 | Resumable pipeline stages | §10 |
 | Swappable implementations | §12 |
 | Getting `exports` right | §13 |
+| Wire a public library class directly | §15 |
+| Reusable, injectable module | §16 |
+
+---
+
+## 15. Wire a public library class
+
+Don't write a wrapper module when a public, installable class already does the
+job — wire it as a plugin directly (SKILL guideline *Reuse before creating*).
+A `torchaudio` transform and an `sklearn` scaler each become a one-block plugin;
+no `myproject.*` code is needed for them.
+
+```yaml
+#!/bin/env inex
+
+input_dir: ???
+output_dir: ???
+
+plugins:
+  - resampler
+  - mel_spectrogram
+  - scaler
+
+# torchaudio transform wired directly — no MyResampler wrapper
+resampler:
+  module: torchaudio.transforms/Resample
+  options:
+    orig_freq: 44100
+    new_freq: 16000
+
+# public feature extractor, also used as-is
+mel_spectrogram:
+  module: torchaudio.transforms/MelSpectrogram
+  options:
+    sample_rate: 16000
+    n_mels: 80
+    hop_length: 160          # samples; 10 ms at 16 kHz
+
+# sklearn scaler instead of a hand-written normalizer
+scaler:
+  module: sklearn.preprocessing/StandardScaler
+  options:
+    with_mean: true
+    with_std: true
+
+execute:
+  method: myproject.cli/extract_features
+  imports:
+    resampler: plugins.resampler
+    mel_spectrogram: plugins.mel_spectrogram
+    scaler: plugins.scaler
+  options:
+    input_dir: ${input_dir}
+    output_dir: ${output_dir}
+```
+
+```python
+# myproject/cli.py — the only project code: it composes the public objects
+def extract_features(resampler, mel_spectrogram, scaler,
+                     input_dir: str, output_dir: str) -> None:
+    ...
+```
+
+Takeaways: public classes are imported via `module:` with no wrapper; their
+constructor arguments go in `options`; the whole objects pass through `imports`
+(no `exports` needed). Write project code only for the part no library covers —
+here, the `extract_features` glue.
+
+---
+
+## 16. Focused, injectable module for reuse
+
+Each new class has a single responsibility and receives its collaborators
+through `imports` (SKILL guidelines *Design modules for reuse* and *Testable and
+mockable code*). `ScoreComputer` neither loads the model nor writes files: the
+model and device are injected (so a test can pass mocks), and file I/O lives in a
+separate `write_scores` function called by `execute`.
+
+```yaml
+#!/bin/env inex
+
+checkpoint_path: ???
+feats_path: ???
+output_dir: ???
+batch_size: 256
+
+plugins:
+  - device
+  - model
+  - feature_reader
+  - score_computer
+
+device:
+  module: torch/device
+  options: { device: cuda }
+
+model:
+  module: myproject.models/load_model
+  options:
+    checkpoint_path: ${checkpoint_path}
+
+feature_reader:
+  module: myproject.data/FeatureReader     # focused: only reads features
+  options:
+    feats_path: ${feats_path}
+
+score_computer:
+  module: myproject.infer/ScoreComputer    # focused: only computes scores
+  imports:
+    model: plugins.model                   # injected → mockable in tests
+    device: plugins.device                 # injected → mockable in tests
+    reader: plugins.feature_reader
+  options:
+    batch_size: ${batch_size}
+
+execute:
+  method: myproject.data.io/write_scores   # side effects kept at the boundary
+  imports:
+    scores: plugins.score_computer
+  options:
+    output_dir: ${output_dir}
+```
+
+```python
+# myproject/infer.py
+class ScoreComputer:
+    """Compute model scores over a feature reader. No I/O, no model loading."""
+
+    def __init__(self, model, device, reader, batch_size: int):
+        self.model = model            # injected — replace with a mock in tests
+        self.device = device
+        self.reader = reader
+        self.batch_size = batch_size
+
+    def __iter__(self):
+        for batch in self.reader.batches(self.batch_size):
+            yield self.model(batch.to(self.device))
+
+# myproject/data/io.py
+def write_scores(scores, output_dir: str) -> None:
+    """File I/O kept out of ScoreComputer so the core logic stays testable."""
+    ...
+```
+
+Takeaways: constructor dependencies arrive via `imports` and can be mocked;
+`device`, `model`, and `feature_reader` are all built before `score_computer`;
+side effects sit in `write_scores` at the `execute` boundary, not in a
+constructor; no `exports` are needed because whole objects are passed.

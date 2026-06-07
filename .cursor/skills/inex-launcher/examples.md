@@ -1386,6 +1386,158 @@ def process(inputs: dict, output_dir: str) -> None:
 
 ---
 
+## 21. Wire public library classes directly (no wrapper)
+
+**Pattern:** Use `sklearn`, `torch`, or other installable packages as plugins; write project code only for orchestration.
+
+Best for: classical ML baselines, standard preprocessing, optimizers — anything a public API already provides.
+
+```yaml
+#!/bin/env inex
+
+train_features_path: ???
+train_labels_path: ???
+test_features_path: ???
+output_path: ???
+
+plugins:
+  - train_features
+  - train_labels
+  - test_features
+  - normalizer
+  - classifier
+  - predictions
+
+train_features:
+  module: myproject.data/load_matrix
+  options:
+    path: ${train_features_path}
+
+train_labels:
+  module: myproject.data/load_vector
+  options:
+    path: ${train_labels_path}
+
+test_features:
+  module: myproject.data/load_matrix
+  options:
+    path: ${test_features_path}
+
+normalizer:
+  module: sklearn.preprocessing/StandardScaler
+
+classifier:
+  module: sklearn.linear_model/LogisticRegression
+  options:
+    max_iter: 1000
+
+predictions:
+  module: myproject.ml/fit_and_predict
+  imports:
+    normalizer: plugins.normalizer
+    model: plugins.classifier
+    train_X: plugins.train_features
+    train_y: plugins.train_labels
+    test_X: plugins.test_features
+
+execute:
+  method: myproject.data.io/save_vector
+  imports:
+    values: plugins.predictions
+  options:
+    path: ${output_path}
+```
+
+```python
+# myproject/ml/fit_and_predict.py
+def fit_and_predict(normalizer, model, train_X, train_y, test_X):
+    X_train = normalizer.fit_transform(train_X)
+    X_test = normalizer.transform(test_X)
+    model.fit(X_train, train_y)
+    return model.predict(X_test)
+```
+
+**Takeaways:**
+- `StandardScaler` and `LogisticRegression` are plugins — no thin wrapper classes
+- Project code (`fit_and_predict`) only orchestrates; library objects arrive via `imports`
+- I/O stays in small loaders and the `execute` writer
+
+---
+
+## 22. Focused reusable module with injectable dependencies
+
+**Pattern:** A single-responsibility class receives `model`, `device`, and data objects through `imports`; side effects stay in `execute`.
+
+Best for: inference scorers, embedding extractors, decoders — any stage you will reuse across experiment configs.
+
+```yaml
+#!/bin/env inex
+
+checkpoint_path: ???
+features_path: ???
+result_path: ???
+batch_size: 32
+
+plugins:
+  - device
+  - model
+  - features
+  - score_computer
+
+device:
+  module: torch/device
+  options:
+    device: cuda
+
+model:
+  module: myproject.models/load_model
+  options:
+    checkpoint: ${checkpoint_path}
+
+features:
+  module: myproject.data/FeatureSet
+  options:
+    pathname: ${features_path}
+
+score_computer:
+  module: myproject.infer/ScoreComputer
+  imports:
+    model: plugins.model
+    device: plugins.device
+    feats_set: plugins.features
+  options:
+    batch_size: ${batch_size}
+
+execute:
+  method: myproject.data.io/write_results
+  imports:
+    data_set: plugins.score_computer
+  options:
+    file_path: ${result_path}
+```
+
+```python
+# myproject/infer/score.py
+class ScoreComputer:
+    def __init__(self, model, device, feats_set, batch_size: int = 32):
+        self.model = model
+        self.device = device
+        self.feats_set = feats_set
+        self.batch_size = batch_size
+
+    def compute_scores(self):
+        self.model.to(self.device)
+        self.model.eval()
+        ...
+```
+
+**Takeaways:**
+- `model` and `device` are injected — easy to mock in unit tests
+- No checkpoint loading or file writing inside the scorer constructor
+- Descriptive plugin keys (`score_computer`) document the pipeline in YAML alone
+
+---
+
 ## Pattern selection guide
 
 | Goal | Start with section |
@@ -1403,6 +1555,8 @@ def process(inputs: dict, output_dir: str) -> None:
 | Generate configs from templates | §14 |
 | Swappable model architectures | §15 |
 | Exports: only referenced attrs | §16 |
+| Wire public libs without wrappers | §21 |
+| Injectable, reusable ML modules | §22 |
 
 ---
 
