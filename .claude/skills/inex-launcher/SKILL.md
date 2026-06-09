@@ -6,7 +6,8 @@ description: >-
   wiring plugin chains with options/imports/exports/execute, debugging config
   resolution or plugin dependency errors, or building data-prep, inference, or
   training CLIs driven by inex / inex-launcher / YAML-driven Python. Focused on
-  Python module and config design, not shell wrappers, Slurm, or how to launch inex.
+  Python module and config design, plus local `inex` runs for validation and
+  debugging; not shell wrappers, Slurm, or deployment orchestration.
 ---
 
 # InEx Launcher — building CLI utilities
@@ -22,8 +23,10 @@ importable Python; the YAML wires it together. This means you swap
 implementations, paths, and hyperparameters in YAML without writing a new
 entry-point script per experiment.
 
-This skill covers **how to write the Python modules and the config**. It does
-**not** cover shell wrappers, Slurm, or how a user runs the `inex` command.
+This skill covers **how to write the Python modules and the config**. It is also
+appropriate to run `inex` locally to validate a new utility, collect traces, and
+debug config/module wiring. It does **not** cover shell wrappers, Slurm, or
+deployment orchestration around `inex`.
 
 For exhaustive syntax tables, see [reference.md](reference.md). For complete
 annotated, copy-pasteable configs, see [examples.md](examples.md). When exact

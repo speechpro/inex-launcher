@@ -1,6 +1,6 @@
 ---
 name: inex-launcher
-description: Guidance for building Python CLI utilities with InEx Launcher YAML configs. Use when Codex needs to create or review an InEx/inex-launcher based utility, write importable Python modules for InEx plugins, design plugin chains with options/imports/exports/execute, debug InEx config wiring, or explain how to structure a YAML/JSON InEx configuration. Focus on Python module and config design, not shell wrappers, Slurm, or operational launch scripts.
+description: Guidance for building Python CLI utilities with InEx Launcher YAML configs. Use when Codex needs to create or review an InEx/inex-launcher based utility, write importable Python modules for InEx plugins, design plugin chains with options/imports/exports/execute, debug config wiring with local `inex` runs, or explain how to structure a YAML/JSON InEx configuration. Focus on Python module and config design, plus local validation runs; not shell wrappers, Slurm, or deployment orchestration.
 ---
 
 # InEx Launcher
@@ -319,5 +319,6 @@ Before finishing an InEx utility:
 - Keep top-level required inputs as `???`.
 - Prefer `imports:` over repeated file loading when multiple plugins need the same object.
 - Keep `execute:` as the only place that performs the final action unless a plugin is intentionally a setup side effect.
+- Run `inex` locally when useful to validate a new utility, collect traces, and debug config/module wiring.
 - Use `__mute__: [__all__]` for noisy object-heavy configs, then unmute selectively when debugging.
-- Do not add shell, Slurm, or wrapper-script guidance to this skill; keep it focused on Python modules and InEx config design.
+- Do not add shell, Slurm, deployment orchestration, or wrapper-script guidance to this skill; keep it focused on Python modules, InEx config design, and local validation/debugging runs.

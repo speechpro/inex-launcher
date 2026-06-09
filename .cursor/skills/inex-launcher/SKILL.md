@@ -8,7 +8,9 @@ description: >-
 
 # InEx Launcher — CLI utility development
 
-Guide for designing **Python modules** and **YAML configs** for [inex-launcher](https://github.com/speechpro/inex-launcher) (CLI: `inex`). This skill does **not** cover shell wrappers or how to invoke `inex` from the terminal.
+Guide for designing **Python modules** and **YAML configs** for [inex-launcher](https://github.com/speechpro/inex-launcher) (CLI: `inex`). This skill does **not** cover shell wrappers, Slurm, or production launch/orchestration scripting.
+
+**Scope note — running `inex` to test is in scope.** That exclusion is about which *topics* this skill documents, not a restriction on using the tool. Running `inex` on a config you just built — to surface OmegaConf-resolution or plugin-binding errors, capture the traceback, and fix the config or module — is expected and encouraged.
 
 For syntax tables and resolver details, see [reference.md](reference.md). For complete annotated config examples, see [examples.md](examples.md). For authoritative upstream examples and implementation, see the [inex-launcher GitHub repository](https://github.com/speechpro/inex-launcher).
 
@@ -151,6 +153,16 @@ Before finishing, verify:
 - [ ] Each plugin's `exports` lists **only** attributes referenced as `plugin_name.attr` in some `imports` block (plugins or `execute`); every such reference has a matching `exports` entry
 
 Cross-check against [examples.md](examples.md) for the pattern you are implementing.
+
+### Step 6 — Run it to test
+
+Static checks don't catch every wiring mistake. Once the design passes Step 5, **run the config** to validate it end-to-end — this is in scope and expected:
+
+```bash
+inex conf/my_tool.yaml -u param1=... -u param2=...
+```
+
+Read the output to confirm plugins build in order and `execute` returns. When it fails, the traceback pinpoints the cause — an unresolved `${...}`, a missing `exports` entry, a signature/key mismatch, or a plugin ordered too late. Fix the config or module and re-run. This *build → run → read trace → fix* loop is the fastest way to validate a new utility; don't stop at the static checklist when you can actually run it.
 
 ---
 

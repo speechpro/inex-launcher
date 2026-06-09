@@ -452,9 +452,10 @@ execute:
 ```
 
 > `inex.helpers` also provides `stage`, `execute`, `system`, and `write_script`
-> for orchestrating sub-configs and external commands. Those are
-> launch/orchestration concerns and out of scope for this skill, which focuses
-> on Python-module and config design.
+> for orchestrating sub-configs and external commands. Those are deployment and
+> orchestration-design concerns and out of scope for this skill, which focuses
+> on Python-module and config design. Running `inex` locally to validate a new
+> utility, collect traces, and debug config/module wiring is in scope.
 
 ---
 
